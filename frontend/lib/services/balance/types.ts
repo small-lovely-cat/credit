@@ -13,16 +13,6 @@ export type TransactionType = 'receive' | 'payment' | 'transfer' | 'community';
 export type TransactionStatus = 'success' | 'pending' | 'failed';
 
 /**
- * 用户信息
- */
-export interface User {
-  /** 用户名 */
-  username: string;
-  /** 用户ID */
-  uid: string;
-}
-
-/**
  * 交易记录
  */
 export interface Transaction {
@@ -32,10 +22,10 @@ export interface Transaction {
   type: TransactionType;
   /** 交易金额 */
   amount: number;
-  /** 付款方信息 */
-  payer: User;
-  /** 收款方信息 */
-  payee: User;
+  /** 付款方用户名 */
+  payer_name: string;
+  /** 收款方用户名 */
+  payee_name: string;
   /** 订单号 */
   orderNo: string;
   /** 商户订单号 */

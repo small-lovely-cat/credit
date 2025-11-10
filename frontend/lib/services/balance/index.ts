@@ -9,6 +9,5 @@ export type {
   TransactionType,
   TransactionStatus,
   TransactionQueryParams,
-  User,
 } from './types';
 

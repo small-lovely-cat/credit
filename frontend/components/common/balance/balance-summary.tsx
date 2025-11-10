@@ -1,11 +1,9 @@
 "use client"
 
 import * as React from "react"
-import type { Balance } from "@/lib/services"
+import { useUser } from "@/contexts/user-context"
 
 interface BalanceSummaryProps {
-  /** 余额数据 */
-  balance: Balance
   /** 货币单位 */
   currency?: string
 }
@@ -16,18 +14,22 @@ interface BalanceSummaryProps {
  * 
  * @example
  * ```tsx
- * <BalanceSummary 
- *   balance={{ total: 1000, available: 800, pending: 200 }}
- *   currency="LDC"
- * />
+ * <BalanceSummary currency="LDC" />
  * ```
  */
-export function BalanceSummary({ balance, currency = "LDC" }: BalanceSummaryProps) {
-  const pendingPercent = balance.total > 0 
-    ? (balance.pending / balance.total) * 100 
+export function BalanceSummary({ currency = "LDC" }: BalanceSummaryProps) {
+  const { user, loading } = useUser()
+
+  // 从用户信息中获取余额数据
+  const available = user?.available_balance ?? 0
+  const total = user?.total_balance ?? 0
+  const pending = total - available
+
+  const pendingPercent = total > 0 
+    ? (pending / total) * 100 
     : 0
-  const availablePercent = balance.total > 0 
-    ? (balance.available / balance.total) * 100 
+  const availablePercent = total > 0 
+    ? (available / total) * 100 
     : 0
 
   return (
@@ -58,7 +60,7 @@ export function BalanceSummary({ balance, currency = "LDC" }: BalanceSummaryProp
             <div className="size-3 bg-[#6366F1]/80 rounded-xs" />
             <span>可用</span>
           </div>
-          <span>{currency} {balance.available.toFixed(2)}</span>
+          <span>{loading ? '-' : `${currency} ${available.toFixed(2)}`}</span>
         </div>
 
         <div className="flex justify-between items-center font-bold text-sm pb-2 border-b border-border/50">
@@ -66,7 +68,7 @@ export function BalanceSummary({ balance, currency = "LDC" }: BalanceSummaryProp
             <div className="size-3 bg-gray-400/80 rounded-xs" />
             <span>未来款项</span>
           </div>
-          <span>{currency} {balance.pending.toFixed(2)}</span>
+          <span>{loading ? '-' : `${currency} ${pending.toFixed(2)}`}</span>
         </div>
       </div>
     </div>

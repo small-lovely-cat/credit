@@ -45,7 +45,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { useUser } from "@/hooks/use-user"
+import { useUser } from "@/contexts/user-context"
 
 const data = {
   navMain: [

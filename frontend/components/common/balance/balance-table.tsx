@@ -166,13 +166,13 @@ function TransactionListWithPagination({ type }: { type?: TransactionType }) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="whitespace-nowrap w-[180px]">订单名称</TableHead>
+                <TableHead className="whitespace-nowrap w-[180px]">名称</TableHead>
                 <TableHead className="whitespace-nowrap text-center w-[80px]">类型</TableHead>
-                <TableHead className="whitespace-nowrap text-right w-[120px]">订单金额</TableHead>
+                <TableHead className="whitespace-nowrap text-right w-[120px]">金额</TableHead>
                 <TableHead className="whitespace-nowrap text-center w-[140px]">交易双方</TableHead>
                 <TableHead className="whitespace-nowrap text-center w-[160px]">订单号</TableHead>
                 <TableHead className="whitespace-nowrap text-center w-[160px]">商户订单号</TableHead>
-                <TableHead className="whitespace-nowrap text-center w-[120px]">订单时间</TableHead>
+                <TableHead className="whitespace-nowrap text-center w-[120px]">时间</TableHead>
                 <TableHead className="whitespace-nowrap text-center w-[80px]">状态</TableHead>
                 <TableHead className="sticky right-0 whitespace-nowrap text-center bg-muted shadow-[-4px_0_8px_-2px_rgba(0,0,0,0.1)] w-[150px]">操作</TableHead>
               </TableRow>
@@ -231,12 +231,6 @@ function TransactionTableRow({ transaction }: { transaction: Transaction }) {
     )
   }
 
-  // 安全检查
-  if (!transaction.payer || !transaction.payee) {
-    console.error('Transaction missing payer or payee:', transaction)
-    return null
-  }
-
   return (
     <TableRow className="h-8">
       <TableCell className="text-xs font-medium whitespace-nowrap py-1">
@@ -261,14 +255,14 @@ function TransactionTableRow({ transaction }: { transaction: Transaction }) {
                 <Avatar className="h-4 w-4">
                   <AvatarImage src={undefined} />
                   <AvatarFallback className="text-[9px] bg-primary text-primary-foreground">
-                    {transaction.payer.username.substring(0, 1)}
+                    {transaction.payer_name.substring(0, 1)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="text-xs font-bold">⭢</div>
                 <Avatar className="h-4 w-4">
                   <AvatarImage src={undefined} />
                   <AvatarFallback className="text-[9px] bg-primary text-primary-foreground">
-                    {transaction.payee.username.substring(0, 1)}
+                    {transaction.payee_name.substring(0, 1)}
                   </AvatarFallback>
                 </Avatar>
               </div>
@@ -277,13 +271,11 @@ function TransactionTableRow({ transaction }: { transaction: Transaction }) {
               <div className="space-y-2">
                 <div>
                   <p className="text-xs font-semibold">付款方</p>
-                  <p className="text-xs">用户名: {transaction.payer.username}</p>
-                  <p className="text-xs text-muted-foreground">{transaction.payer.uid}</p>
+                  <p className="text-xs">账户: {transaction.payer_name}</p>
                 </div>
                 <div>
                   <p className="text-xs font-semibold">收款方</p>
-                  <p className="text-xs">用户名: {transaction.payee.username}</p>
-                  <p className="text-xs text-muted-foreground">{transaction.payee.uid}</p>
+                  <p className="text-xs">账户: {transaction.payee_name}</p>
                 </div>
               </div>
             </TooltipContent>

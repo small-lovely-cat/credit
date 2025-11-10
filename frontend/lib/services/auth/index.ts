@@ -3,7 +3,7 @@
  */
 
 export { AuthService } from './auth.service';
-export { TrustLevel } from './types';
+export { TrustLevel, PayLevel } from './types';
 export type {
   User,
   OAuthLoginUrlResponse,

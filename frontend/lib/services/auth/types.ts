@@ -15,6 +15,20 @@ export enum TrustLevel {
 }
 
 /**
+ * 支付等级
+ */
+export enum PayLevel {
+  /** 黑金 */
+  BlackGold = 0,
+  /** 白金 */
+  WhiteGold = 1,
+  /** 黄金 */
+  Gold = 2,
+  /** 铂金 */
+  Platinum = 3,
+}
+
+/**
  * 用户基本信息
  */
 export interface User {
@@ -28,8 +42,18 @@ export interface User {
   trust_level: TrustLevel;
   /** 头像 URL */
   avatar_url: string;
-  /** 评分 */
-  score: number;
+  /** 支付评分 */
+  pay_score: number;
+  /** 总余额 */
+  total_balance: number;
+  /** 可用余额 */
+  available_balance: number;
+  /** 当日剩余配额 */
+  remain_quota: number;
+  /** 支付等级 */
+  pay_level: PayLevel;
+  /** 每日限额 */
+  daily_limit: number | null;
 }
 
 /**

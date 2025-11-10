@@ -9,14 +9,8 @@
             "orderName": "在线购物订单",
             "type": "receive",
             "amount": 2850.00,
-            "payer": {
-                "username": "商户A",
-                "uid": "UID20001"
-            },
-            "payee": {
-                "username": "张三",
-                "uid": "UID10001"
-            },
+            "payer_name": "商户A",
+            "payee_name": "张三",
             "orderNo": "202411060001",
             "merchantOrderNo": "M2024110600001",
             "time": "2024-11-06 14:30:25",
@@ -26,14 +20,8 @@
             "orderName": "会员充值",
             "type": "receive",
             "amount": 1000.00,
-            "payer": {
-                "username": "商户A",
-                "uid": "UID20001"
-            },
-            "payee": {
-                "username": "王五",
-                "uid": "UID10003"
-            },
+            "payer_name": "商户A",
+            "payee_name": "王五",
             "orderNo": "202411060004",
             "merchantOrderNo": "M2024110600004",
             "time": "2024-11-06 10:05:30",
@@ -45,14 +33,8 @@
             "orderName": "账户转账",
             "type": "transfer",
             "amount": 5000.00,
-            "payer": {
-                "username": "王五",
-                "uid": "UID10003"
-            },
-            "payee": {
-                "username": "李四",
-                "uid": "UID10002"
-            },
+            "payer_name": "王五",
+            "payee_name": "李四",
             "orderNo": "202411060003",
             "merchantOrderNo": "M2024110600003",
             "time": "2024-11-06 11:20:45",
@@ -64,14 +46,8 @@
             "orderName": "社区奖励发放",
             "type": "community",
             "amount": 500.00,
-            "payer": {
-                "username": "社区基金",
-                "uid": "UID30001"
-            },
-            "payee": {
-                "username": "张三",
-                "uid": "UID10001"
-            },
+            "payer_name": "社区基金",
+            "payee_name": "张三",
             "orderNo": "202411060005",
             "merchantOrderNo": "M2024110600005",
             "time": "2024-11-05 16:00:00",
