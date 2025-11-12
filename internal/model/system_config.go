@@ -1,0 +1,49 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2025 linux.do
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+package model
+
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
+
+// 配置键常量 - 所有系统配置的 key 定义
+const (
+	ConfigKeyMerchantOrderExpireMinutes = "merchant_order_expire_minutes" // 商家订单过期时间（分钟）
+	ConfigKeyWebsiteOrderExpireMinutes  = "website_order_expire_minutes"  // 网站订单过期时间（分钟）
+)
+
+type SystemConfig struct {
+	Key         string    `json:"key" gorm:"primaryKey;size:64;not null"`
+	Value       string    `json:"value" gorm:"size:255;not null"`
+	Description string    `json:"description" gorm:"size:255"`
+	UpdatedAt   time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+	CreatedAt   time.Time `json:"created_at" gorm:"autoCreateTime"`
+}
+
+// GetByKey 通过 key 查询配置
+func (sc *SystemConfig) GetByKey(tx *gorm.DB, key string) error {
+	return tx.Where("key = ?", key).First(sc).Error
+}

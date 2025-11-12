@@ -18,47 +18,37 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * OUT OF OR IN CONNECTION WITH THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package model
+package admin
 
-type TrustLevel uint8
+import (
+	"github.com/linux-do/pay/internal/logger"
+	"github.com/linux-do/pay/internal/otel_trace"
+	"net/http"
 
-const (
-	TrustLevelNewUser TrustLevel = iota
-	TrustLevelBasicUser
-	TrustLevelUser
-	TrustLevelActiveUser
-	TrustLevelLeader
+	"github.com/gin-gonic/gin"
+	"github.com/linux-do/pay/internal/apps/oauth"
 )
 
-type PayLevel uint8
+func LoginAdminRequired() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// init trace
+		ctx, span := otel_trace.Start(c.Request.Context(), "LoginAdminRequired")
+		defer span.End()
 
-const (
-	PayLevelFree PayLevel = iota
-	PayLevelBasic
-	PayLevelStandard
-	PayLevelPremium
-)
+		user, _ := oauth.GetUserFromContext(c)
 
-type OrderType string
+		if !user.IsAdmin {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error_msg": AdminRequired, "data": nil})
+			return
+		}
 
-const (
-	OrderTypeReceive   OrderType = "receive"
-	OrderTypePayment   OrderType = "payment"
-	OrderTypeTransfer  OrderType = "transfer"
-	OrderTypeCommunity OrderType = "community"
-)
+		// log
+		logger.InfoF(ctx, "[LoginAdminRequired] %d %s", user.ID, user.Username)
 
-type OrderStatus string
-
-const (
-	OrderStatusSuccess   OrderStatus = "success"
-	OrderStatusFailed    OrderStatus = "failed"
-	OrderStatusPending   OrderStatus = "pending"
-	OrderStatusDisputing OrderStatus = "disputing"
-	OrderStatusRefund    OrderStatus = "refund"
-	OrderStatusRefunding OrderStatus = "refunding"
-)
+		// next
+		c.Next()
+	}
+}

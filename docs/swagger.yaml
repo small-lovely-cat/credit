@@ -58,6 +58,7 @@ definitions:
         - success
         - pending
         - failed
+        - expired
         - disputing
         - refund
         - refunded
@@ -69,6 +70,20 @@ definitions:
         - transfer
         - community
         type: string
+    type: object
+  payment.CreateOrderRequest:
+    properties:
+      amount:
+        type: number
+      order_name:
+        maxLength: 64
+        type: string
+      remark:
+        maxLength: 255
+        type: string
+    required:
+    - amount
+    - order_name
     type: object
   util.ResponseAny:
     properties:
@@ -183,6 +198,50 @@ paths:
             $ref: '#/definitions/util.ResponseAny'
       tags:
       - merchant
+  /api/v1/merchant/payment:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 订单号
+        in: query
+        name: order_no
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.ResponseAny'
+      tags:
+      - payment
+  /api/v1/merchant/payment/orders:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer {ClientID}:{ClientSecret}
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/payment.CreateOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.ResponseAny'
+      tags:
+      - payment
   /api/v1/oauth/callback:
     post:
       parameters:

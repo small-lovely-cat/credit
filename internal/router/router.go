@@ -30,10 +30,16 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/linux-do/pay/internal/apps/admin"
+
+	"github.com/linux-do/pay/internal/apps/payment"
+
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
 	_ "github.com/linux-do/pay/docs"
+	"github.com/linux-do/pay/internal/apps/admin/system_config"
+	"github.com/linux-do/pay/internal/apps/admin/user_pay_config"
 	"github.com/linux-do/pay/internal/apps/health"
 	"github.com/linux-do/pay/internal/apps/merchant"
 	"github.com/linux-do/pay/internal/apps/oauth"
@@ -112,17 +118,50 @@ func Serve() {
 
 			// Merchant
 			merchantRouter := apiV1Router.Group("/merchant")
-			merchantRouter.Use(oauth.LoginRequired())
 			{
-				merchantRouter.POST("/api-keys", merchant.CreateAPIKey)
-				merchantRouter.GET("/api-keys", merchant.ListAPIKeys)
+				merchantRouter.POST("/api-keys", oauth.LoginRequired(), merchant.CreateAPIKey)
+				merchantRouter.GET("/api-keys", oauth.LoginRequired(), merchant.ListAPIKeys)
 
 				apiKeyRouter := merchantRouter.Group("/api-keys/:id")
-				apiKeyRouter.Use(merchant.RequireAPIKey())
+				apiKeyRouter.Use(oauth.LoginRequired(), merchant.RequireAPIKey())
 				{
 					apiKeyRouter.GET("", merchant.GetAPIKey)
 					apiKeyRouter.PUT("", merchant.UpdateAPIKey)
 					apiKeyRouter.DELETE("", merchant.DeleteAPIKey)
+				}
+
+				// Merchant Payment
+				MerchantPaymentRouter := merchantRouter.Group("/payment")
+				{
+					MerchantPaymentRouter.POST("/orders", payment.RequireMerchantAuth(), payment.CreateMerchantOrder)
+					MerchantPaymentRouter.GET("", oauth.LoginRequired(), payment.PayMerchantOrder)
+				}
+			}
+
+			// Admin
+			adminRouter := apiV1Router.Group("/admin")
+			adminRouter.Use(oauth.LoginRequired(), admin.LoginAdminRequired())
+			{
+				// System Config
+				adminRouter.POST("/system-configs", system_config.CreateSystemConfig)
+				adminRouter.GET("/system-configs", system_config.ListSystemConfigs)
+
+				systemConfigRouter := adminRouter.Group("/system-configs/:key")
+				{
+					systemConfigRouter.GET("", system_config.GetSystemConfig)
+					systemConfigRouter.PUT("", system_config.UpdateSystemConfig)
+					systemConfigRouter.DELETE("", system_config.DeleteSystemConfig)
+				}
+
+				// User Pay Config
+				adminRouter.POST("/user-pay-configs", user_pay_config.CreateUserPayConfig)
+				adminRouter.GET("/user-pay-configs", user_pay_config.ListUserPayConfigs)
+
+				userPayConfigRouter := adminRouter.Group("/user-pay-configs/:id")
+				{
+					userPayConfigRouter.GET("", user_pay_config.GetUserPayConfig)
+					userPayConfigRouter.PUT("", user_pay_config.UpdateUserPayConfig)
+					userPayConfigRouter.DELETE("", user_pay_config.DeleteUserPayConfig)
 				}
 			}
 		}

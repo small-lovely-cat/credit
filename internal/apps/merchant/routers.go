@@ -84,7 +84,7 @@ func CreateAPIKey(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, util.OKNil())
+	c.JSON(http.StatusOK, util.OK(apiKey))
 }
 
 // ListAPIKeys 获取商户 API Key 列表

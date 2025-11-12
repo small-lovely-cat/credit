@@ -173,6 +173,75 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/merchant/payment": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "payment"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "订单号",
+                        "name": "order_no",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/util.ResponseAny"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/merchant/payment/orders": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "payment"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {ClientID}:{ClientSecret}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/payment.CreateOrderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/util.ResponseAny"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/oauth/callback": {
             "post": {
                 "produces": [
@@ -371,6 +440,7 @@ const docTemplate = `{
                         "success",
                         "pending",
                         "failed",
+                        "expired",
                         "disputing",
                         "refund",
                         "refunded"
@@ -384,6 +454,26 @@ const docTemplate = `{
                         "transfer",
                         "community"
                     ]
+                }
+            }
+        },
+        "payment.CreateOrderRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "order_name"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "order_name": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "remark": {
+                    "type": "string",
+                    "maxLength": 255
                 }
             }
         },

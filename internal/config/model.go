@@ -42,6 +42,7 @@ type appConfig struct {
 	Env               string `mapstructure:"env"`
 	Addr              string `mapstructure:"addr"`
 	APIPrefix         string `mapstructure:"api_prefix"`
+	FrontendPayURL    string `mapstructure:"frontend_pay_url"`
 	SessionCookieName string `mapstructure:"session_cookie_name"`
 	SessionSecret     string `mapstructure:"session_secret"`
 	SessionDomain     string `mapstructure:"session_domain"`

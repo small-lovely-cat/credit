@@ -25,8 +25,20 @@
 package model
 
 import (
-	"gorm.io/gorm"
 	"time"
+
+	"github.com/shopspring/decimal"
+	"gorm.io/gorm"
+)
+
+type TrustLevel uint8
+
+const (
+	TrustLevelNewUser TrustLevel = iota
+	TrustLevelBasicUser
+	TrustLevelUser
+	TrustLevelActiveUser
+	TrustLevelLeader
 )
 
 type OAuthUserInfo struct {
@@ -39,21 +51,25 @@ type OAuthUserInfo struct {
 }
 
 type User struct {
-	ID               uint64     `json:"id" gorm:"primaryKey"`
-	Username         string     `json:"username" gorm:"size:64;unique;index"`
-	Nickname         string     `json:"nickname" gorm:"size:100"`
-	AvatarUrl        string     `json:"avatar_url" gorm:"size:100"`
-	TrustLevel       TrustLevel `json:"trust_level" gorm:"index"`
-	PayScore         int64      `json:"pay_score" gorm:"default:0;index"`
-	PayKey           string     `json:"pay_key" gorm:"size:10;index"`
-	SignKey          string     `json:"sign_key" gorm:"size:64;unique;index;not null"`
-	TotalBalance     int64      `json:"total_balance" gorm:"default:0;index"`
-	AvailableBalance int64      `json:"available_balance" gorm:"default:0;index"`
-	IsActive         bool       `json:"is_active" gorm:"default:true"`
-	IsAdmin          bool       `json:"is_admin" gorm:"default:false"`
-	LastLoginAt      time.Time  `json:"last_login_at" gorm:"index"`
-	CreatedAt        time.Time  `json:"created_at" gorm:"autoCreateTime;index"`
-	UpdatedAt        time.Time  `json:"updated_at" gorm:"autoUpdateTime;index"`
+	ID               uint64          `json:"id" gorm:"primaryKey"`
+	Username         string          `json:"username" gorm:"size:64;uniqueIndex;index"`
+	Nickname         string          `json:"nickname" gorm:"size:100"`
+	AvatarUrl        string          `json:"avatar_url" gorm:"size:100"`
+	TrustLevel       TrustLevel      `json:"trust_level" gorm:"index"`
+	PayScore         int64           `json:"pay_score" gorm:"default:0;index"`
+	PayKey           string          `json:"pay_key" gorm:"size:10;index"`
+	SignKey          string          `json:"sign_key" gorm:"size:64;uniqueIndex;index;not null"`
+	TotalReceive     decimal.Decimal `json:"total_receive" gorm:"type:numeric(20,2);default:0"`
+	TotalPayment     decimal.Decimal `json:"total_payment" gorm:"type:numeric(20,2);default:0"`
+	TotalTransfer    decimal.Decimal `json:"total_transfer" gorm:"type:numeric(20,2);default:0"`
+	TotalCommunity   decimal.Decimal `json:"total_community" gorm:"type:numeric(20,2);default:0"`
+	AvailableBalance decimal.Decimal `json:"available_balance" gorm:"type:numeric(20,2);default:0"`
+	CommunityBalance decimal.Decimal `json:"community_balance" gorm:"type:numeric(20,2);default:0"`
+	IsActive         bool            `json:"is_active" gorm:"default:true"`
+	IsAdmin          bool            `json:"is_admin" gorm:"default:false"`
+	LastLoginAt      time.Time       `json:"last_login_at" gorm:"index"`
+	CreatedAt        time.Time       `json:"created_at" gorm:"autoCreateTime;index"`
+	UpdatedAt        time.Time       `json:"updated_at" gorm:"autoUpdateTime;index"`
 }
 
 func (u *User) Exact(tx *gorm.DB, id uint64) error {

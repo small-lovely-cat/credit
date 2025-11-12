@@ -26,7 +26,6 @@ package oauth
 
 import (
 	"fmt"
-	"github.com/linux-do/pay/internal/model"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
@@ -34,7 +33,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/linux-do/pay/internal/db"
 	"github.com/linux-do/pay/internal/logger"
+	"github.com/linux-do/pay/internal/model"
 	"github.com/linux-do/pay/internal/util"
+	"github.com/shopspring/decimal"
 )
 
 // GetLoginURL godoc
@@ -104,8 +105,12 @@ type BasicUserInfo struct {
 	Nickname         string           `json:"nickname"`
 	TrustLevel       model.TrustLevel `json:"trust_level"`
 	AvatarUrl        string           `json:"avatar_url"`
-	TotalBalance     int64            `json:"total_balance"`
-	AvailableBalance int64            `json:"available_balance"`
+	TotalReceive     decimal.Decimal  `json:"total_receive"`
+	TotalPayment     decimal.Decimal  `json:"total_payment"`
+	TotalTransfer    decimal.Decimal  `json:"total_transfer"`
+	TotalCommunity   decimal.Decimal  `json:"total_community"`
+	CommunityBalance decimal.Decimal  `json:"community_balance"`
+	AvailableBalance decimal.Decimal  `json:"available_balance"`
 	PayScore         int64            `json:"pay_score"`
 	RemainQuota      int64            `json:"remain_quota"`
 	PayLevel         model.PayLevel   `json:"pay_level"`
@@ -120,9 +125,8 @@ type BasicUserInfo struct {
 func UserInfo(c *gin.Context) {
 	user, _ := GetUserFromContext(c)
 
-	var payConfig model.UserPayConfig
-	if err := db.DB(c.Request.Context()).Where("min_score <= ?", user.PayScore).
-		Where("max_score IS NULL OR max_score > ?", user.PayScore).First(&payConfig).Error; err != nil {
+	payConfig := &model.UserPayConfig{}
+	if err := payConfig.GetByPayScore(db.DB(c.Request.Context()), user.PayScore); err != nil {
 		c.JSON(http.StatusInternalServerError, util.Err(err.Error()))
 		return
 	}
@@ -135,7 +139,11 @@ func UserInfo(c *gin.Context) {
 			Nickname:         user.Nickname,
 			TrustLevel:       user.TrustLevel,
 			AvatarUrl:        user.AvatarUrl,
-			TotalBalance:     user.TotalBalance,
+			TotalReceive:     user.TotalReceive,
+			TotalPayment:     user.TotalPayment,
+			TotalTransfer:    user.TotalTransfer,
+			TotalCommunity:   user.TotalCommunity,
+			CommunityBalance: user.CommunityBalance,
 			AvailableBalance: user.AvailableBalance,
 			PayScore:         user.PayScore,
 			RemainQuota:      0,

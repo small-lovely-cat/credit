@@ -33,8 +33,8 @@ import (
 type MerchantAPIKey struct {
 	ID             uint64         `json:"id" gorm:"primaryKey"`
 	UserID         uint64         `json:"user_id" gorm:"not null;index:idx_merchant_api_keys_user_created,priority:1"`
-	ClientID       string         `json:"client_id" gorm:"size:64;unique;index;not null"`
-	ClientSecret   string         `json:"client_secret" gorm:"size:64;not null"`
+	ClientID       string         `json:"client_id" gorm:"size:64;uniqueIndex;index:idx_client_credentials,priority:2;not null"`
+	ClientSecret   string         `json:"client_secret" gorm:"size:64;index:idx_client_credentials,priority:1;not null"`
 	AppName        string         `json:"app_name" gorm:"size:20;not null"`
 	AppHomepageURL string         `json:"app_homepage_url" gorm:"size:100;not null"`
 	AppDescription string         `json:"app_description" gorm:"size:100"`

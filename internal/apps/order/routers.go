@@ -39,7 +39,7 @@ type TransactionListRequest struct {
 	Page      int        `json:"page" form:"page" binding:"min=1"`
 	PageSize  int        `json:"page_size" form:"page_size" binding:"min=1,max=100"`
 	Type      string     `json:"type" form:"type" binding:"omitempty,oneof=receive payment transfer community"`
-	Status    string     `json:"status" form:"status" binding:"omitempty,oneof=success pending failed disputing refund refunded"`
+	Status    string     `json:"status" form:"status" binding:"omitempty,oneof=success pending failed expired disputing refund refunded"`
 	StartTime *time.Time `json:"startTime" form:"startTime" binding:"omitempty"`
 	EndTime   *time.Time `json:"endTime" form:"endTime" binding:"omitempty,gtfield=StartTime"`
 }

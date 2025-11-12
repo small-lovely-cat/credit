@@ -33,19 +33,41 @@ import (
 	"gorm.io/gorm"
 )
 
+type OrderType string
+
+const (
+	OrderTypeReceive   OrderType = "receive"
+	OrderTypePayment   OrderType = "payment"
+	OrderTypeTransfer  OrderType = "transfer"
+	OrderTypeCommunity OrderType = "community"
+)
+
+type OrderStatus string
+
+const (
+	OrderStatusSuccess   OrderStatus = "success"
+	OrderStatusFailed    OrderStatus = "failed"
+	OrderStatusPending   OrderStatus = "pending"
+	OrderStatusExpired   OrderStatus = "expired"
+	OrderStatusDisputing OrderStatus = "disputing"
+	OrderStatusRefund    OrderStatus = "refund"
+	OrderStatusRefunding OrderStatus = "refunding"
+)
+
 type Order struct {
 	ID              uint64          `json:"id" gorm:"primaryKey;autoIncrement"`
 	OrderNo         string          `json:"order_no" gorm:"-"`
 	OrderName       string          `json:"order_name" gorm:"size:64;not null"`
 	MerchantOrderNo string          `json:"merchant_order_no" gorm:"size:64;index"`
-	ClientID        string          `json:"client_id" gorm:"size:64;index;index:idx_orders_client_status_created,priority:1"`
-	PayerUsername   string          `json:"payer_username" gorm:"size:64;index:idx_orders_payer_status_type_created,priority:1"`
+	ClientID        string          `json:"client_id" gorm:"size:64;index:idx_orders_client_status_created,priority:1"`
+	PayerUsername   string          `json:"payer_username" gorm:"size:64;index:idx_orders_payer_status_type_created,priority:1;index:idx_orders_payer_status_type_trade,priority:1"`
 	PayeeUsername   string          `json:"payee_username" gorm:"size:64;index:idx_orders_payee_status_type_created,priority:1"`
 	Amount          decimal.Decimal `json:"amount" gorm:"type:numeric(20,2);not null;index"`
-	Status          OrderStatus     `json:"status" gorm:"type:varchar(20);not null;index;index:idx_orders_payee_status_type_created,priority:2;index:idx_orders_payer_status_type_created,priority:2;index:idx_orders_client_status_created,priority:2"`
-	Type            OrderType       `json:"type" gorm:"type:varchar(20);not null;index;index:idx_orders_payee_status_type_created,priority:3;index:idx_orders_payer_status_type_created,priority:3"`
+	Status          OrderStatus     `json:"status" gorm:"type:varchar(20);not null;index;index:idx_orders_payee_status_type_created,priority:2;index:idx_orders_payer_status_type_created,priority:2;index:idx_orders_client_status_created,priority:2;index:idx_orders_payer_status_type_trade,priority:2"`
+	Type            OrderType       `json:"type" gorm:"type:varchar(20);not null;index;index:idx_orders_payee_status_type_created,priority:3;index:idx_orders_payer_status_type_created,priority:3;index:idx_orders_payer_status_type_trade,priority:3"`
 	Remark          string          `json:"remark" gorm:"size:255"`
-	TradeTime       time.Time       `json:"trade_time" gorm:"index"`
+	TradeTime       time.Time       `json:"trade_time" gorm:"index:idx_orders_payer_status_type_trade,priority:4"`
+	ExpiresAt       time.Time       `json:"expires_at" gorm:"not null"`
 	CreatedAt       time.Time       `json:"created_at" gorm:"autoCreateTime;index;index:idx_orders_payee_status_type_created,priority:4;index:idx_orders_payer_status_type_created,priority:4;index:idx_orders_client_status_created,priority:3"`
 	UpdatedAt       time.Time       `json:"updated_at" gorm:"autoUpdateTime"`
 }

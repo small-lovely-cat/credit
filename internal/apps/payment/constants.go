@@ -22,38 +22,13 @@
  * SOFTWARE.
  */
 
-package model
-
-import (
-	"time"
-
-	"github.com/shopspring/decimal"
-	"gorm.io/gorm"
-)
-
-type PayLevel uint8
+package payment
 
 const (
-	PayLevelFree PayLevel = iota
-	PayLevelBasic
-	PayLevelStandard
-	PayLevelPremium
+	APIKeyObjKey = "payment_api_key_obj"
 )
 
-type UserPayConfig struct {
-	ID         uint64          `json:"id" gorm:"primaryKey;autoIncrement"`
-	Level      PayLevel        `json:"level" gorm:"uniqueIndex;not null"`
-	MinScore   int64           `json:"min_score" gorm:"not null;index:idx_score_range,priority:1"`
-	MaxScore   *int64          `json:"max_score" gorm:"index:idx_score_range,priority:2"`
-	DailyLimit *int64          `json:"daily_limit"`
-	FeeRate    decimal.Decimal `json:"fee_rate" gorm:"type:numeric(3,2);default:0;check:fee_rate >= 0 AND fee_rate <= 1"`
-	CreatedAt  time.Time       `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt  time.Time       `json:"updated_at" gorm:"autoUpdateTime"`
-}
-
-// GetByPayScore 通过 pay_score 查询对应的支付配置
-func (upc *UserPayConfig) GetByPayScore(tx *gorm.DB, payScore int64) error {
-	return tx.Where("min_score <= ?", payScore).
-		Where("max_score IS NULL OR max_score > ?", payScore).
-		First(upc).Error
-}
+const (
+	// OrderMerchantIDCacheKeyFormat Redis key 格式，用于存储订单号对应的商户ID
+	OrderMerchantIDCacheKeyFormat = "payment:order:merchant:%s"
+)
