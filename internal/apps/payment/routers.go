@@ -110,6 +110,20 @@ func CreateMerchantOrder(c *gin.Context) {
 		return
 	}
 
+	// 获取商家订单过期时间（分钟）
+	var systemConfig model.SystemConfig
+	if err := systemConfig.GetByKey(db.DB(c.Request.Context()), model.ConfigKeyMerchantOrderExpireMinutes); err != nil {
+		c.JSON(http.StatusInternalServerError, util.Err(err.Error()))
+		return
+	}
+
+	// 将配置值转换为 int 类型
+	expireMinutes, errMinutes := strconv.Atoi(systemConfig.Value)
+	if errMinutes != nil {
+		c.JSON(http.StatusInternalServerError, util.Err(fmt.Sprintf(SystemConfigValueInvalid, model.ConfigKeyMerchantOrderExpireMinutes, errMinutes)))
+		return
+	}
+
 	var response CreateOrderResponse
 
 	if err := db.DB(c.Request.Context()).Transaction(
@@ -123,7 +137,7 @@ func CreateMerchantOrder(c *gin.Context) {
 				Status:        model.OrderStatusPending,
 				Type:          model.OrderTypePayment,
 				Remark:        req.Remark,
-				ExpiresAt:     time.Now().Add(5 * time.Minute), // 5分钟后过期
+				ExpiresAt:     time.Now().Add(time.Duration(expireMinutes) * time.Minute),
 			}
 			if err := tx.Create(&order).Error; err != nil {
 				return err
@@ -135,7 +149,7 @@ func CreateMerchantOrder(c *gin.Context) {
 			}
 
 			merchantIDStr := strconv.FormatUint(merchantUser.ID, 10)
-			if errSet := db.Redis.Set(c.Request.Context(), fmt.Sprintf(OrderMerchantIDCacheKeyFormat, encryptString), merchantIDStr, 5*time.Minute).Err(); errSet != nil {
+			if errSet := db.Redis.Set(c.Request.Context(), fmt.Sprintf(OrderMerchantIDCacheKeyFormat, encryptString), merchantIDStr, time.Duration(expireMinutes)*time.Minute).Err(); errSet != nil {
 				return fmt.Errorf("failed to set redis key: %w", errSet)
 			}
 

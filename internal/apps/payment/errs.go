@@ -37,4 +37,5 @@ const (
 	DailyLimitExceeded          = "超过当日支付限额"
 	PayConfigNotFound           = "支付配置不存在"
 	PayKeyIncorrect             = "支付密码错误"
+	SystemConfigValueInvalid    = "系统配置 %s 的值无法转换为整数: %v"
 )
