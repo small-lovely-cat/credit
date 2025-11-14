@@ -37,17 +37,17 @@ import (
 
 // CreateUserPayConfigRequest 创建支付配置请求
 type CreateUserPayConfigRequest struct {
-	Level      model.PayLevel  `json:"level" binding:"required"`
-	MinScore   int64           `json:"min_score" binding:"required,min=0"`
-	MaxScore   *int64          `json:"max_score"`
+	Level      model.PayLevel  `json:"level"`
+	MinScore   int64           `json:"min_score" binding:"min=0"`
+	MaxScore   *int64          `json:"max_score" binding:"omitempty,gtfield=MinScore"`
 	DailyLimit *int64          `json:"daily_limit"`
 	FeeRate    decimal.Decimal `json:"fee_rate" binding:"required"`
 }
 
 // UpdateUserPayConfigRequest 更新支付配置请求
 type UpdateUserPayConfigRequest struct {
-	MinScore   int64           `json:"min_score" binding:"required,min=0"`
-	MaxScore   *int64          `json:"max_score"`
+	MinScore   int64           `json:"min_score" binding:"min=0"`
+	MaxScore   *int64          `json:"max_score" binding:"omitempty,gtfield=MinScore"`
 	DailyLimit *int64          `json:"daily_limit"`
 	FeeRate    decimal.Decimal `json:"fee_rate" binding:"required"`
 }
@@ -63,12 +63,6 @@ func CreateUserPayConfig(c *gin.Context) {
 	var req CreateUserPayConfigRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, util.Err(err.Error()))
-		return
-	}
-
-	// 验证分数范围
-	if req.MaxScore != nil && *req.MaxScore <= req.MinScore {
-		c.JSON(http.StatusBadRequest, util.Err(ScoreRangeInvalid))
 		return
 	}
 
@@ -159,12 +153,6 @@ func UpdateUserPayConfig(c *gin.Context) {
 	var req UpdateUserPayConfigRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, util.Err(err.Error()))
-		return
-	}
-
-	// 验证分数范围
-	if req.MaxScore != nil && *req.MaxScore <= req.MinScore {
-		c.JSON(http.StatusBadRequest, util.Err(ScoreRangeInvalid))
 		return
 	}
 

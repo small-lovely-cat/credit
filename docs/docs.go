@@ -902,9 +902,7 @@ const docTemplate = `{
         "user_pay_config.CreateUserPayConfigRequest": {
             "type": "object",
             "required": [
-                "fee_rate",
-                "level",
-                "min_score"
+                "fee_rate"
             ],
             "properties": {
                 "daily_limit": {
@@ -928,8 +926,7 @@ const docTemplate = `{
         "user_pay_config.UpdateUserPayConfigRequest": {
             "type": "object",
             "required": [
-                "fee_rate",
-                "min_score"
+                "fee_rate"
             ],
             "properties": {
                 "daily_limit": {

@@ -160,8 +160,6 @@ definitions:
         type: integer
     required:
     - fee_rate
-    - level
-    - min_score
     type: object
   user_pay_config.UpdateUserPayConfigRequest:
     properties:
@@ -176,7 +174,6 @@ definitions:
         type: integer
     required:
     - fee_rate
-    - min_score
     type: object
   util.ResponseAny:
     properties:
