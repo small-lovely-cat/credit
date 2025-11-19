@@ -46,6 +46,7 @@ func Migrate() {
 		&model.MerchantAPIKey{},
 		&model.Order{},
 		&model.SystemConfig{},
+		&model.Dispute{},
 	); err != nil {
 		log.Fatalf("[PostgreSQL] auto migrate failed: %v\n", err)
 	}

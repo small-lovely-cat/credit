@@ -51,10 +51,11 @@ type TransactionListResponse struct {
 	PageSize int   `json:"page_size"`
 	Orders   []struct {
 		model.Order
-		AppName        string `json:"app_name"`
-		AppHomepageURL string `json:"app_homepage_url"`
-		AppDescription string `json:"app_description"`
-		RedirectURI    string `json:"redirect_uri"`
+		AppName        string  `json:"app_name"`
+		AppHomepageURL string  `json:"app_homepage_url"`
+		AppDescription string  `json:"app_description"`
+		RedirectURI    string  `json:"redirect_uri"`
+		DisputeID      *uint64 `json:"dispute_id"`
 	} `json:"orders"`
 }
 
@@ -75,9 +76,12 @@ func ListTransactions(c *gin.Context) {
 	user, _ := oauth.GetUserFromContext(c)
 
 	baseQuery := db.DB(c.Request.Context()).Model(&model.Order{}).
-		Select("orders.*, merchant_api_keys.app_name, merchant_api_keys.app_homepage_url, merchant_api_keys.app_description, merchant_api_keys.redirect_uri").
+		Select("orders.*, merchant_api_keys.app_name, merchant_api_keys.app_homepage_url, merchant_api_keys.app_description, merchant_api_keys.redirect_uri, disputes.id as dispute_id, payer_user.username as payer_username, payee_user.username as payee_username").
 		Joins("LEFT JOIN merchant_api_keys ON orders.client_id = merchant_api_keys.client_id").
-		Where("orders.payee_username = ? OR orders.payer_username = ?", user.Username, user.Username)
+		Joins("LEFT JOIN disputes ON orders.id = disputes.order_id").
+		Joins("LEFT JOIN users as payer_user ON orders.payer_user_id = payer_user.id").
+		Joins("LEFT JOIN users as payee_user ON orders.payee_user_id = payee_user.id").
+		Where("orders.payee_user_id = ? OR orders.payer_user_id = ?", user.ID, user.ID)
 
 	if req.Status != "" {
 		baseQuery = baseQuery.Where("orders.status = ?", model.OrderStatus(req.Status))

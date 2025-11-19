@@ -136,15 +136,15 @@ func HandleUpdateSingleUserGamificationScore(ctx context.Context, t *asynq.Task)
 		}
 
 		order := model.Order{
-			OrderName:     "社区积分更新",
-			PayerUsername: "LINUX DO Community",
-			PayeeUsername: user.Username,
-			Amount:        diff,
-			Status:        model.OrderStatusSuccess,
-			Type:          model.OrderTypeCommunity,
-			Remark:        fmt.Sprintf("社区积分从 %s 更新到 %s，变化 %s", oldCommunityBalance.String(), newCommunityBalance.String(), diff.String()),
-			TradeTime:     now,
-			ExpiresAt:     now,
+			OrderName:   "社区积分更新",
+			PayerUserID: 0,
+			PayeeUserID: user.ID,
+			Amount:      diff,
+			Status:      model.OrderStatusSuccess,
+			Type:        model.OrderTypeCommunity,
+			Remark:      fmt.Sprintf("社区积分从 %s 更新到 %s，变化 %s", oldCommunityBalance.String(), newCommunityBalance.String(), diff.String()),
+			TradeTime:   now,
+			ExpiresAt:   now,
 		}
 		if err := tx.Create(&order).Error; err != nil {
 			return fmt.Errorf("创建用户[%s]社区积分订单失败: %w", user.Username, err)

@@ -37,6 +37,7 @@ import (
 	"time"
 
 	"github.com/linux-do/pay/internal/apps/admin"
+	"github.com/linux-do/pay/internal/apps/dispute"
 	"github.com/linux-do/pay/internal/listener"
 
 	"github.com/linux-do/pay/internal/apps/payment"
@@ -127,6 +128,11 @@ func Serve() {
 			orderRouter.Use(oauth.LoginRequired())
 			{
 				orderRouter.POST("/transactions", order.ListTransactions)
+				orderRouter.POST("/dispute", dispute.CreateDispute)
+				orderRouter.POST("/disputes/merchant", dispute.ListMerchantDisputes)
+				orderRouter.POST("/disputes", dispute.ListDisputes)
+				orderRouter.POST("/refund-review", dispute.RefundReview)
+				orderRouter.POST("/dispute/close", dispute.CloseDispute)
 			}
 
 			// MerchantAPIKey

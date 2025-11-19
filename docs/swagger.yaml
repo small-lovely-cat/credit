@@ -1,4 +1,56 @@
 definitions:
+  dispute.CloseDisputeRequest:
+    properties:
+      dispute_id:
+        type: integer
+    required:
+    - dispute_id
+    type: object
+  dispute.CreateDisputeRequest:
+    properties:
+      order_id:
+        type: integer
+      reason:
+        maxLength: 100
+        type: string
+    required:
+    - order_id
+    - reason
+    type: object
+  dispute.ListDisputesRequest:
+    properties:
+      dispute_id:
+        type: integer
+      page:
+        minimum: 1
+        type: integer
+      page_size:
+        maximum: 100
+        minimum: 1
+        type: integer
+      status:
+        enum:
+        - disputing
+        - refund
+        - closed
+        type: string
+    type: object
+  dispute.RefundReviewRequest:
+    properties:
+      dispute_id:
+        type: integer
+      reason:
+        maxLength: 100
+        type: string
+      status:
+        enum:
+        - refund
+        - closed
+        type: string
+    required:
+    - dispute_id
+    - status
+    type: object
   merchant.CreateAPIKeyRequest:
     properties:
       app_description:
@@ -577,6 +629,104 @@ paths:
             $ref: '#/definitions/util.ResponseAny'
       tags:
       - oauth
+  /api/v1/order/dispute:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dispute.CreateDisputeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.ResponseAny'
+      tags:
+      - order
+  /api/v1/order/dispute/close:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dispute.CloseDisputeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.ResponseAny'
+      tags:
+      - order
+  /api/v1/order/disputes:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: request body
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/dispute.ListDisputesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.ResponseAny'
+      tags:
+      - order
+  /api/v1/order/disputes/merchant:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: request body
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/dispute.ListDisputesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.ResponseAny'
+      tags:
+      - order
+  /api/v1/order/refund-review:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dispute.RefundReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.ResponseAny'
+      tags:
+      - order
   /api/v1/order/transactions:
     post:
       consumes:

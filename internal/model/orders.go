@@ -63,8 +63,10 @@ type Order struct {
 	OrderName       string          `json:"order_name" gorm:"size:64;not null"`
 	MerchantOrderNo string          `json:"merchant_order_no" gorm:"size:64;index"`
 	ClientID        string          `json:"client_id" gorm:"size:64;index:idx_orders_client_status_created,priority:1;index:idx_orders_client_payee,priority:1;index:idx_orders_client_payer,priority:1"`
-	PayerUsername   string          `json:"payer_username" gorm:"size:64;index:idx_orders_payer_status_type_created,priority:1;index:idx_orders_payer_status_type_trade,priority:1;index:idx_orders_client_payer,priority:2"`
-	PayeeUsername   string          `json:"payee_username" gorm:"size:64;index:idx_orders_payee_status_type_created,priority:1;index:idx_orders_client_payee,priority:2"`
+	PayerUserID     uint64          `json:"payer_user_id" gorm:"index:idx_orders_payer_status_type_created,priority:1;index:idx_orders_payer_status_type_trade,priority:1;index:idx_orders_client_payer,priority:2"`
+	PayeeUserID     uint64          `json:"payee_user_id" gorm:"index:idx_orders_payee_status_type_created,priority:1;index:idx_orders_client_payee,priority:2"`
+	PayerUsername   string          `json:"payer_username" gorm:"-"`
+	PayeeUsername   string          `json:"payee_username" gorm:"-"`
 	Amount          decimal.Decimal `json:"amount" gorm:"type:numeric(20,2);not null;index"`
 	Status          OrderStatus     `json:"status" gorm:"type:varchar(20);not null;index:idx_orders_payee_status_type_created,priority:2;index:idx_orders_payer_status_type_created,priority:2;index:idx_orders_client_status_created,priority:2;index:idx_orders_payer_status_type_trade,priority:2"`
 	Type            OrderType       `json:"type" gorm:"type:varchar(20);not null;index:idx_orders_payee_status_type_created,priority:3;index:idx_orders_payer_status_type_created,priority:3;index:idx_orders_payer_status_type_trade,priority:3"`

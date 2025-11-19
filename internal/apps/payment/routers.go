@@ -137,14 +137,14 @@ func CreateMerchantOrder(c *gin.Context) {
 		func(tx *gorm.DB) error {
 			// 创建订单
 			order := model.Order{
-				OrderName:     req.OrderName,
-				ClientID:      apiKey.ClientID,
-				PayeeUsername: merchantUser.Username,
-				Amount:        req.Amount,
-				Status:        model.OrderStatusPending,
-				Type:          model.OrderTypePayment,
-				Remark:        req.Remark,
-				ExpiresAt:     time.Now().Add(time.Duration(expireMinutes) * time.Minute),
+				OrderName:   req.OrderName,
+				ClientID:    apiKey.ClientID,
+				PayeeUserID: merchantUser.ID,
+				Amount:      req.Amount,
+				Status:      model.OrderStatusPending,
+				Type:        model.OrderTypePayment,
+				Remark:      req.Remark,
+				ExpiresAt:   time.Now().Add(time.Duration(expireMinutes) * time.Minute),
 			}
 			if err := tx.Create(&order).Error; err != nil {
 				return err
@@ -198,7 +198,9 @@ func GetMerchantOrder(c *gin.Context) {
 
 	var order model.Order
 	if err := db.DB(c.Request.Context()).
-		Where("id = ? AND status = ?", orderCtx.OrderID, model.OrderStatusPending).
+		Select("orders.*, payer_user.username as payer_username").
+		Joins("LEFT JOIN users as payer_user ON orders.payer_user_id = payer_user.id").
+		Where("orders.id = ? AND orders.status = ?", orderCtx.OrderID, model.OrderStatusPending).
 		First(&order).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, util.Err(OrderNotFound))
@@ -296,8 +298,8 @@ func PayMerchantOrder(c *gin.Context) {
 				// 统计当日成功支付的订单总金额
 				var todayTotalAmount decimal.Decimal
 				if err := tx.Model(&model.Order{}).
-					Where("payer_username = ? AND status = ? AND type = ? AND trade_time >= ? AND trade_time < ?",
-						orderCtx.CurrentUser.Username,
+					Where("payer_user_id = ? AND status = ? AND type = ? AND trade_time >= ? AND trade_time < ?",
+						orderCtx.CurrentUser.ID,
 						model.OrderStatusSuccess,
 						model.OrderTypePayment,
 						todayStart,
@@ -329,7 +331,7 @@ func PayMerchantOrder(c *gin.Context) {
 				order.Remark = feeRemark
 			}
 			order.Status = model.OrderStatusSuccess
-			order.PayerUsername = orderCtx.CurrentUser.Username
+			order.PayerUserID = orderCtx.CurrentUser.ID
 			order.TradeTime = time.Now()
 			if err := tx.Save(&order).Error; err != nil {
 				return err
