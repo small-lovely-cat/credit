@@ -84,6 +84,11 @@ func initSystemConfigs() {
 			Value:       "10",
 			Description: "网站订单过期时间（分钟）",
 		},
+		{
+			Key:         model.ConfigKeyDisputeTimeWindowHours,
+			Value:       "10080",
+			Description: "商家争议时间窗口（小时）",
+		},
 	}
 
 	if err := tx.Create(&defaultConfigs).Error; err != nil {
