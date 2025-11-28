@@ -161,7 +161,7 @@ export function ManagePage<T>({
 
     if (error) {
       return (
-        <div className="p-8 border-2 border-dashed border-border rounded-lg">
+        <div className="p-8 border border-dashed rounded-lg">
           <ErrorInline
             error={error}
             onRetry={onReload}

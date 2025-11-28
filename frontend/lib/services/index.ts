@@ -25,6 +25,8 @@ import { TransactionService } from './transaction';
 import { MerchantService } from './merchant';
 import { AdminService } from './admin';
 import { UserService } from './user';
+import { DisputeService } from './dispute';
+import { ConfigService } from './config';
 
 /**
  * 服务对象
@@ -44,6 +46,10 @@ const services = {
   admin: AdminService,
   /** 用户服务 */
   user: UserService,
+  /** 争议服务 */
+  dispute: DisputeService,
+  /** 配置服务 */
+  config: ConfigService,
 } as const;
 
 export default services;
@@ -96,7 +102,26 @@ export type {
   OrderStatus,
   TransactionQueryParams,
   TransactionListResponse,
+  CreateDisputeRequest,
 } from './transaction';
+
+// 争议服务
+export { DisputeService } from './dispute';
+export type {
+  Dispute,
+  DisputeStatus,
+  DisputeWithOrder,
+  ListDisputesRequest,
+  ListDisputesResponse,
+  RefundReviewRequest,
+  CloseDisputeRequest,
+} from './dispute';
+
+// 配置服务
+export { ConfigService } from './config';
+export type {
+  PublicConfigResponse,
+} from './config';
 
 // 商户服务
 export { MerchantService } from './merchant';
@@ -125,3 +150,4 @@ export type {
 // 用户服务
 export { UserService } from './user';
 export type { UpdatePayKeyRequest } from './user';
+

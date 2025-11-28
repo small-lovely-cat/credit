@@ -1,5 +1,5 @@
 import { BaseService } from '../core/base.service';
-import type { TransactionQueryParams, TransactionListResponse } from './types';
+import type { TransactionQueryParams, TransactionListResponse, CreateDisputeRequest } from './types';
 
 /**
  * 交易服务
@@ -31,8 +31,11 @@ export class TransactionService extends BaseService {
   /**
    * 创建争议
    * @param data - 争议信息
+   * @throws {UnauthorizedError} 当未登录时
+   * @throws {NotFoundError} 当订单不存在或不符合争议条件时
+   * @throws {ValidationError} 当参数验证失败时
    */
-  static async createDispute(data: { order_no: string; reason: string; description?: string }): Promise<void> {
+  static async createDispute(data: CreateDisputeRequest): Promise<void> {
     return this.post('/dispute', data);
   }
 }

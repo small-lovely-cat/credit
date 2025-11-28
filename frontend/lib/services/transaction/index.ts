@@ -10,5 +10,7 @@ export type {
   OrderStatus,
   TransactionQueryParams,
   TransactionListResponse,
+  CreateDisputeRequest,
 } from './types';
+
 

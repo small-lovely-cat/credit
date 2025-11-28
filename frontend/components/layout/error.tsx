@@ -75,8 +75,8 @@ export function ErrorDisplay({
 
       {/* 重试按钮 */}
       {onRetry && (
-        <Button 
-          onClick={onRetry} 
+        <Button
+          onClick={onRetry}
           variant="outline"
           className="mt-2"
         >
@@ -113,7 +113,7 @@ export function ErrorDisplay({
  * ```
  */
 export function ErrorInline({
-  message = "发生错误",
+  message,
   error,
   onRetry,
   className,
@@ -122,12 +122,12 @@ export function ErrorInline({
 
   return (
     <div className={cn("flex items-center gap-2 text-sm text-red-600 dark:text-red-400", className)}>
-      <AlertCircle className="size-4 shrink-0" />
-      <span className="flex-1">{errorMessage}</span>
+      <AlertCircle className="size-3 shrink-0 text-destructive" />
+      <span className="flex-1 text-xs">{errorMessage}</span>
       {onRetry && (
-        <Button 
-          onClick={onRetry} 
-          variant="secondary" 
+        <Button
+          onClick={onRetry}
+          variant="secondary"
           size="sm"
           className="h-6 px-4 text-xs"
         >
@@ -155,8 +155,8 @@ export function ErrorInline({
 export function ErrorPage(props: ErrorDisplayProps) {
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
-      <ErrorDisplay 
-        {...props} 
+      <ErrorDisplay
+        {...props}
         showStack={props.showStack ?? process.env.NODE_ENV === 'development'}
       />
     </div>

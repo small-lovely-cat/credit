@@ -54,6 +54,8 @@ export interface Order {
   app_description?: string;
   /** 重定向 URI（可选） */
   redirect_uri?: string;
+  /** 关联的争议 ID（可选） */
+  dispute_id?: number;
 }
 
 /**
@@ -95,10 +97,9 @@ export interface TransactionListResponse {
  * 创建争议请求
  */
 export interface CreateDisputeRequest {
-  /** 订单号 */
-  order_no: string;
-  /** 争议原因 */
+  /** 订单 ID */
+  order_id: number;
+  /** 争议原因（最大 100 字符） */
   reason: string;
-  /** 详细描述（可选） */
-  description?: string;
 }
+

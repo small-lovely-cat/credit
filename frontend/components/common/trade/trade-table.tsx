@@ -31,7 +31,7 @@ export function TradeTable({ type }: { type?: OrderType }) {
 /**
  * 交易列表组件
  * 
- * 显示交易记录
+ * 显示交用户交易记录
  */
 function TransactionList({ initialType }: { initialType?: OrderType }) {
   const {

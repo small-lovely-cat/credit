@@ -21,6 +21,7 @@ interface TransactionContextState {
   loadMore: () => Promise<void>
   refresh: () => Promise<void>
   reset: () => void
+  updateOrderStatus: (orderId: number, updates: Partial<Pick<Order, 'status' | 'dispute_id'>>) => void
 }
 
 /* 交易上下文 */
@@ -176,6 +177,20 @@ export function TransactionProvider({ children, defaultParams = {} }: Transactio
     })
   }, [fetchTransactions, lastParams, pageSize])
 
+  /* 乐观更新订单状态 */
+  const updateOrderStatus = useCallback((orderId: number, updates: Partial<Pick<Order, 'status' | 'dispute_id'>>) => {
+    setTransactions(prev =>
+      prev.map(order =>
+        order.id === orderId
+          ? { ...order, ...updates }
+          : order
+      )
+    )
+
+    // 清除所有缓存，确保下次刷新时获取最新数据
+    cacheRef.current = {}
+  }, [])
+
   /* 重置状态 */
   const reset = useCallback(() => {
     setTransactions([])
@@ -201,6 +216,7 @@ export function TransactionProvider({ children, defaultParams = {} }: Transactio
     loadMore,
     refresh,
     reset,
+    updateOrderStatus,
   }
 
   return (
