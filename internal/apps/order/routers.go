@@ -56,6 +56,8 @@ type TransactionListResponse struct {
 		AppDescription string  `json:"app_description"`
 		RedirectURI    string  `json:"redirect_uri"`
 		DisputeID      *uint64 `json:"dispute_id"`
+		PayerUsername  string  `json:"payer_username"`
+		PayeeUsername  string  `json:"payee_username"`
 	} `json:"orders"`
 }
 
