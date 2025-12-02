@@ -436,7 +436,7 @@ export default function DemoPayPage() {
                 <div className="flex gap-2">
                   <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-500 flex-shrink-0 mt-0.5" />
                   <p className="text-[10px] text-yellow-800 dark:text-yellow-300">
-                    <strong>注意：</strong>这是 DEMO 测试页面，创建的订单会调用生产 API，支付链接会跳转到真实支付页面
+                    <strong>注意：</strong>这是 DEMO 测试页面，创建的订单会调用生产 API，支付链接会跳转到真实支付页面，支付后会正常扣款！
                   </p>
                 </div>
               </div>
@@ -453,7 +453,7 @@ export default function DemoPayPage() {
                     remark: ""
                   })
                 }}
-                className="w-full h-8 text-xs border-dashed"
+                className="w-full h-8 text-xs border-dashed shadow-none"
               >
                 创建新订单
               </Button>

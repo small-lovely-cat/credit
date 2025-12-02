@@ -13,8 +13,8 @@ import { TransactionProvider, useTransaction } from "@/contexts/transaction-cont
 /** 商家功能列表 */
 const MERCHANT_ACTIONS = [
   {
-    title: "处理退款",
-    description: "为客户办理退款操作",
+    title: "处理争议",
+    description: "处理此商户的所有争议",
     icon: Undo2,
     color: "text-orange-600",
     bgColor: "bg-orange-50 dark:bg-orange-950/20",
@@ -22,7 +22,7 @@ const MERCHANT_ACTIONS = [
   },
   {
     title: "所有订单",
-    description: "获取商户的所有订单",
+    description: "显示此商户的所有交易",
     icon: FileText,
     color: "text-blue-600",
     bgColor: "bg-blue-50 dark:bg-blue-950/20",
@@ -30,7 +30,7 @@ const MERCHANT_ACTIONS = [
   },
   {
     title: "快速测试",
-    description: "创建测试订单验证集成",
+    description: "创建此商户的测试订单",
     icon: Zap,
     color: "text-yellow-600",
     bgColor: "bg-yellow-50 dark:bg-yellow-950/20",
@@ -167,15 +167,15 @@ function MerchantDataContent({ apiKey }: MerchantDataProps) {
                   }
                 }}
               >
-                <div className="flex items-center gap-3 mb-3">
+                <div className="flex items-center gap-4">
                   <div className={`rounded-lg p-2 ${action.bgColor}`}>
                     <Icon className={`h-4 w-4 ${action.color}`} />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-medium text-sm group-hover:text-foreground">{action.title}</h3>
+                    <p className="text-xs text-muted-foreground">{action.description}</p>
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground">{action.description}</p>
               </button>
             )
           })}
