@@ -134,8 +134,9 @@ type scheduleConfig struct {
 
 // workerConfig 工作配置
 type workerConfig struct {
-	Concurrency int           `mapstructure:"concurrency"`
-	Queues      []QueueConfig `mapstructure:"queues"`
+	Concurrency    int           `mapstructure:"concurrency"`
+	StrictPriority bool          `mapstructure:"strict_priority"`
+	Queues         []QueueConfig `mapstructure:"queues"`
 }
 
 // QueueConfig 队列配置

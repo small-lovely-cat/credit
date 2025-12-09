@@ -81,10 +81,11 @@ schedule:
 # Worker
 worker:
   concurrency: 20
+  strict_priority: false
   queues:
-    - name: whitelist_only
-      priority: 10
     - name: webhook
+      priority: 10
+    - name: whitelist_only
       priority: 5
     - name: default
       priority: 3

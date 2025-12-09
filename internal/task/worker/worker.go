@@ -37,16 +37,13 @@ import (
 
 // StartWorker 启动任务处理服务器
 func StartWorker() error {
-	// 从配置构建队列映射
-	queues := buildQueuesFromConfig()
-
 	asynqServer := asynq.NewServer(
 		task.RedisOpt,
 		asynq.Config{
 			Concurrency:     config.Config.Worker.Concurrency,
 			ShutdownTimeout: 3 * time.Minute,
-			Queues:          queues,
-			StrictPriority:  true,
+			Queues:          buildQueuesFromConfig(),
+			StrictPriority:  config.Config.Worker.StrictPriority,
 		},
 	)
 
