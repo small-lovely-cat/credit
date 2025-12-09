@@ -22,10 +22,33 @@
  * SOFTWARE.
  */
 
-package merchant
+package api_key
 
-const (
-	APIKeyNotFound      = "API Key 不存在"
-	NoFieldsToUpdate    = "没有需要更新的字段"
-	PaymentLinkNotFound = "支付链接不存在"
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/linux-do/pay/internal/apps/merchant"
+	"github.com/linux-do/pay/internal/apps/oauth"
+	"github.com/linux-do/pay/internal/db"
+	"github.com/linux-do/pay/internal/model"
+	"github.com/linux-do/pay/internal/util"
 )
+
+func RequireAPIKey() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user, _ := util.GetFromContext[*model.User](c, oauth.UserObjKey)
+
+		var apiKey model.MerchantAPIKey
+		if err := db.DB(c.Request.Context()).
+			Where("id = ? AND user_id = ?", c.Param("id"), user.ID).
+			First(&apiKey).Error; err != nil {
+			c.AbortWithStatusJSON(http.StatusNotFound, util.Err(merchant.APIKeyNotFound))
+			return
+		}
+
+		util.SetToContext(c, merchant.APIKeyObjKey, &apiKey)
+
+		c.Next()
+	}
+}

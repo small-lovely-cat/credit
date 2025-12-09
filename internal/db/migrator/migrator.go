@@ -44,6 +44,7 @@ func Migrate() {
 		&model.User{},
 		&model.UserPayConfig{},
 		&model.MerchantAPIKey{},
+		&model.MerchantPaymentLink{},
 		&model.Order{},
 		&model.SystemConfig{},
 		&model.Dispute{},

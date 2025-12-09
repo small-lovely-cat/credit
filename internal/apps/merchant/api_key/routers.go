@@ -22,12 +22,13 @@
  * SOFTWARE.
  */
 
-package merchant
+package api_key
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/linux-do/pay/internal/apps/merchant"
 	"github.com/linux-do/pay/internal/apps/oauth"
 	"github.com/linux-do/pay/internal/db"
 	"github.com/linux-do/pay/internal/model"
@@ -117,7 +118,7 @@ func ListAPIKeys(c *gin.Context) {
 // @Success 200 {object} util.ResponseAny
 // @Router /api/v1/merchant/api-keys/{id} [get]
 func GetAPIKey(c *gin.Context) {
-	apiKey, _ := util.GetFromContext[*model.MerchantAPIKey](c, APIKeyObjKey)
+	apiKey, _ := util.GetFromContext[*model.MerchantAPIKey](c, merchant.APIKeyObjKey)
 	c.JSON(http.StatusOK, util.OK(apiKey))
 }
 
@@ -136,7 +137,7 @@ func UpdateAPIKey(c *gin.Context) {
 		return
 	}
 
-	apiKey, _ := util.GetFromContext[*model.MerchantAPIKey](c, APIKeyObjKey)
+	apiKey, _ := util.GetFromContext[*model.MerchantAPIKey](c, merchant.APIKeyObjKey)
 
 	updates := make(map[string]interface{})
 	if req.AppName != "" {
@@ -156,7 +157,7 @@ func UpdateAPIKey(c *gin.Context) {
 	}
 
 	if len(updates) == 0 {
-		c.JSON(http.StatusBadRequest, util.Err(NoFieldsToUpdate))
+		c.JSON(http.StatusBadRequest, util.Err(merchant.NoFieldsToUpdate))
 		return
 	}
 
@@ -177,7 +178,7 @@ func UpdateAPIKey(c *gin.Context) {
 // @Success 200 {object} util.ResponseAny
 // @Router /api/v1/merchant/api-keys/{id} [delete]
 func DeleteAPIKey(c *gin.Context) {
-	apiKey, _ := util.GetFromContext[*model.MerchantAPIKey](c, APIKeyObjKey)
+	apiKey, _ := util.GetFromContext[*model.MerchantAPIKey](c, merchant.APIKeyObjKey)
 
 	if err := db.DB(c.Request.Context()).Delete(&apiKey).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, util.Err(err.Error()))

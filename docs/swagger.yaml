@@ -1,4 +1,44 @@
 definitions:
+  api_key.CreateAPIKeyRequest:
+    properties:
+      app_description:
+        maxLength: 100
+        type: string
+      app_homepage_url:
+        maxLength: 100
+        type: string
+      app_name:
+        maxLength: 20
+        type: string
+      notify_url:
+        maxLength: 100
+        type: string
+      redirect_uri:
+        maxLength: 100
+        type: string
+    required:
+    - app_homepage_url
+    - app_name
+    - notify_url
+    type: object
+  api_key.UpdateAPIKeyRequest:
+    properties:
+      app_description:
+        maxLength: 100
+        type: string
+      app_homepage_url:
+        maxLength: 100
+        type: string
+      app_name:
+        maxLength: 20
+        type: string
+      notify_url:
+        maxLength: 100
+        type: string
+      redirect_uri:
+        maxLength: 100
+        type: string
+    type: object
   dispute.CloseDisputeRequest:
     properties:
       dispute_id:
@@ -50,46 +90,6 @@ definitions:
     required:
     - dispute_id
     - status
-    type: object
-  merchant.CreateAPIKeyRequest:
-    properties:
-      app_description:
-        maxLength: 100
-        type: string
-      app_homepage_url:
-        maxLength: 100
-        type: string
-      app_name:
-        maxLength: 20
-        type: string
-      notify_url:
-        maxLength: 100
-        type: string
-      redirect_uri:
-        maxLength: 100
-        type: string
-    required:
-    - app_homepage_url
-    - app_name
-    - notify_url
-    type: object
-  merchant.UpdateAPIKeyRequest:
-    properties:
-      app_description:
-        maxLength: 100
-        type: string
-      app_homepage_url:
-        maxLength: 100
-        type: string
-      app_name:
-        maxLength: 20
-        type: string
-      notify_url:
-        maxLength: 100
-        type: string
-      redirect_uri:
-        maxLength: 100
-        type: string
     type: object
   model.PayLevel:
     enum:
@@ -605,7 +605,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/merchant.CreateAPIKeyRequest'
+          $ref: '#/definitions/api_key.CreateAPIKeyRequest'
       produces:
       - application/json
       responses:
@@ -665,7 +665,68 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/merchant.UpdateAPIKeyRequest'
+          $ref: '#/definitions/api_key.UpdateAPIKeyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.ResponseAny'
+      tags:
+      - merchant
+  /api/v1/merchant/api-keys/{id}/payment-links:
+    get:
+      parameters:
+      - description: API Key ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.ResponseAny'
+      tags:
+      - merchant
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: API Key ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.ResponseAny'
+      tags:
+      - merchant
+  /api/v1/merchant/api-keys/{id}/payment-links/{linkId}:
+    delete:
+      parameters:
+      - description: API Key ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Payment Link ID
+        format: int64
+        in: path
+        name: linkId
+        required: true
+        type: integer
       produces:
       - application/json
       responses:

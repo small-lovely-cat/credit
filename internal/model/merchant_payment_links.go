@@ -22,32 +22,18 @@
  * SOFTWARE.
  */
 
-package merchant
+package model
 
 import (
-	"net/http"
+	"time"
 
-	"github.com/gin-gonic/gin"
-	"github.com/linux-do/pay/internal/apps/oauth"
-	"github.com/linux-do/pay/internal/db"
-	"github.com/linux-do/pay/internal/model"
-	"github.com/linux-do/pay/internal/util"
+	"gorm.io/gorm"
 )
 
-func RequireAPIKey() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		user, _ := util.GetFromContext[*model.User](c, oauth.UserObjKey)
-
-		var apiKey model.MerchantAPIKey
-		if err := db.DB(c.Request.Context()).
-			Where("id = ? AND user_id = ?", c.Param("id"), user.ID).
-			First(&apiKey).Error; err != nil {
-			c.AbortWithStatusJSON(http.StatusNotFound, util.Err(APIKeyNotFound))
-			return
-		}
-
-		util.SetToContext(c, APIKeyObjKey, &apiKey)
-
-		c.Next()
-	}
+type MerchantPaymentLink struct {
+	ID               uint64         `json:"id" gorm:"primaryKey;autoIncrement"`
+	MerchantAPIKeyID uint64         `json:"merchant_api_key_id" gorm:"not null;index"`
+	Token            string         `json:"token" gorm:"size:64;uniqueIndex;not null"`
+	CreatedAt        time.Time      `json:"created_at" gorm:"autoCreateTime;index"`
+	DeletedAt        gorm.DeletedAt `json:"deleted_at" gorm:"index"`
 }

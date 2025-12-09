@@ -39,6 +39,8 @@ import (
 	"github.com/linux-do/pay/internal/apps/admin"
 	publicconfig "github.com/linux-do/pay/internal/apps/config"
 	"github.com/linux-do/pay/internal/apps/dispute"
+	"github.com/linux-do/pay/internal/apps/merchant/api_key"
+	"github.com/linux-do/pay/internal/apps/merchant/link"
 	"github.com/linux-do/pay/internal/listener"
 
 	"github.com/linux-do/pay/internal/apps/payment"
@@ -50,7 +52,6 @@ import (
 	"github.com/linux-do/pay/internal/apps/admin/system_config"
 	"github.com/linux-do/pay/internal/apps/admin/user_pay_config"
 	"github.com/linux-do/pay/internal/apps/health"
-	"github.com/linux-do/pay/internal/apps/merchant"
 	"github.com/linux-do/pay/internal/apps/oauth"
 	"github.com/linux-do/pay/internal/apps/order"
 	"github.com/linux-do/pay/internal/apps/user"
@@ -159,15 +160,23 @@ func Serve() {
 			// MerchantAPIKey
 			merchantRouter := apiV1Router.Group("/merchant")
 			{
-				merchantRouter.POST("/api-keys", oauth.LoginRequired(), merchant.CreateAPIKey)
-				merchantRouter.GET("/api-keys", oauth.LoginRequired(), merchant.ListAPIKeys)
+				merchantRouter.POST("/api-keys", oauth.LoginRequired(), api_key.CreateAPIKey)
+				merchantRouter.GET("/api-keys", oauth.LoginRequired(), api_key.ListAPIKeys)
 
 				apiKeyRouter := merchantRouter.Group("/api-keys/:id")
-				apiKeyRouter.Use(oauth.LoginRequired(), merchant.RequireAPIKey())
+				apiKeyRouter.Use(oauth.LoginRequired(), api_key.RequireAPIKey())
 				{
-					apiKeyRouter.GET("", merchant.GetAPIKey)
-					apiKeyRouter.PUT("", merchant.UpdateAPIKey)
-					apiKeyRouter.DELETE("", merchant.DeleteAPIKey)
+					apiKeyRouter.GET("", api_key.GetAPIKey)
+					apiKeyRouter.PUT("", api_key.UpdateAPIKey)
+					apiKeyRouter.DELETE("", api_key.DeleteAPIKey)
+
+					// Payment Links
+					linkRouter := apiKeyRouter.Group("/payment-links")
+					{
+						linkRouter.GET("", link.ListPaymentLinks)
+						linkRouter.POST("", link.CreatePaymentLink)
+						linkRouter.DELETE("/:linkId", link.DeletePaymentLink)
+					}
 				}
 
 				// MerchantAPIKey Payment

@@ -443,7 +443,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/merchant.CreateAPIKeyRequest"
+                            "$ref": "#/definitions/api_key.CreateAPIKeyRequest"
                         }
                     }
                 ],
@@ -509,7 +509,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/merchant.UpdateAPIKeyRequest"
+                            "$ref": "#/definitions/api_key.UpdateAPIKeyRequest"
                         }
                     }
                 ],
@@ -535,6 +535,99 @@ const docTemplate = `{
                         "format": "int64",
                         "description": "API Key ID",
                         "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/util.ResponseAny"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/merchant/api-keys/{id}/payment-links": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "merchant"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "API Key ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/util.ResponseAny"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "merchant"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "API Key ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/util.ResponseAny"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/merchant/api-keys/{id}/payment-links/{linkId}": {
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "merchant"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "API Key ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Payment Link ID",
+                        "name": "linkId",
                         "in": "path",
                         "required": true
                     }
@@ -981,6 +1074,61 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "api_key.CreateAPIKeyRequest": {
+            "type": "object",
+            "required": [
+                "app_homepage_url",
+                "app_name",
+                "notify_url"
+            ],
+            "properties": {
+                "app_description": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "app_homepage_url": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "app_name": {
+                    "type": "string",
+                    "maxLength": 20
+                },
+                "notify_url": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "redirect_uri": {
+                    "type": "string",
+                    "maxLength": 100
+                }
+            }
+        },
+        "api_key.UpdateAPIKeyRequest": {
+            "type": "object",
+            "properties": {
+                "app_description": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "app_homepage_url": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "app_name": {
+                    "type": "string",
+                    "maxLength": 20
+                },
+                "notify_url": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "redirect_uri": {
+                    "type": "string",
+                    "maxLength": 100
+                }
+            }
+        },
         "dispute.CloseDisputeRequest": {
             "type": "object",
             "required": [
@@ -1053,61 +1201,6 @@ const docTemplate = `{
                         "refund",
                         "closed"
                     ]
-                }
-            }
-        },
-        "merchant.CreateAPIKeyRequest": {
-            "type": "object",
-            "required": [
-                "app_homepage_url",
-                "app_name",
-                "notify_url"
-            ],
-            "properties": {
-                "app_description": {
-                    "type": "string",
-                    "maxLength": 100
-                },
-                "app_homepage_url": {
-                    "type": "string",
-                    "maxLength": 100
-                },
-                "app_name": {
-                    "type": "string",
-                    "maxLength": 20
-                },
-                "notify_url": {
-                    "type": "string",
-                    "maxLength": 100
-                },
-                "redirect_uri": {
-                    "type": "string",
-                    "maxLength": 100
-                }
-            }
-        },
-        "merchant.UpdateAPIKeyRequest": {
-            "type": "object",
-            "properties": {
-                "app_description": {
-                    "type": "string",
-                    "maxLength": 100
-                },
-                "app_homepage_url": {
-                    "type": "string",
-                    "maxLength": 100
-                },
-                "app_name": {
-                    "type": "string",
-                    "maxLength": 20
-                },
-                "notify_url": {
-                    "type": "string",
-                    "maxLength": 100
-                },
-                "redirect_uri": {
-                    "type": "string",
-                    "maxLength": 100
                 }
             }
         },
