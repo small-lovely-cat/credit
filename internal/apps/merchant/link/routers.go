@@ -120,6 +120,18 @@ func ListPaymentLinks(c *gin.Context) {
 	c.JSON(http.StatusOK, util.OK(paymentLinks))
 }
 
+// GetPaymentLinkByToken 通过 Token 查询支付链接信息
+// @Tags merchant
+// @Produce json
+// @Param token path string true "支付链接 Token"
+// @Success 200 {object} util.ResponseAny
+// @Router /api/v1/merchant/payment-links/{token} [get]
+func GetPaymentLinkByToken(c *gin.Context) {
+	paymentLink, _ := util.GetFromContext[*model.MerchantPaymentLink](c, merchant.PaymentLinkObjKey)
+
+	c.JSON(http.StatusOK, util.OK(paymentLink))
+}
+
 // DeletePaymentLink 删除支付链接
 // @Tags merchant
 // @Produce json

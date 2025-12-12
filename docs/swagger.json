@@ -706,6 +706,33 @@
                 }
             }
         },
+        "/api/v1/merchant/payment-links/{token}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "merchant"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "支付链接 Token",
+                        "name": "token",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/util.ResponseAny"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/merchant/payment/order": {
             "get": {
                 "consumes": [

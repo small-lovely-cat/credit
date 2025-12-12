@@ -792,6 +792,23 @@ paths:
             $ref: '#/definitions/util.ResponseAny'
       tags:
       - payment
+  /api/v1/merchant/payment-links/{token}:
+    get:
+      parameters:
+      - description: 支付链接 Token
+        in: path
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.ResponseAny'
+      tags:
+      - merchant
   /api/v1/merchant/payment-links/pay:
     post:
       consumes:

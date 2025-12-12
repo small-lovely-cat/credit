@@ -179,7 +179,7 @@ func Serve() {
 					}
 				}
 
-				// 通过支付链接支付
+				merchantRouter.GET("/payment-links/:token", oauth.LoginRequired(), link.RequirePaymentLink(), link.GetPaymentLinkByToken)
 				merchantRouter.POST("/payment-links/pay", oauth.LoginRequired(), link.PayByLink)
 
 				// MerchantAPIKey Payment
