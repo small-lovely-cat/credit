@@ -58,7 +58,9 @@ type OAuthUserInfo struct {
 
 // UserGamificationScoreResponse API响应
 type UserGamificationScoreResponse struct {
-	GamificationScore int64 `json:"gamification_score"`
+	User struct {
+		GamificationScore int64 `json:"gamification_score"`
+	} `json:"user"`
 }
 
 type User struct {

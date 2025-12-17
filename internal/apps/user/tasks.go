@@ -107,7 +107,7 @@ func HandleUpdateSingleUserGamificationScore(ctx context.Context, t *asynq.Task)
 		return errGet
 	}
 
-	newCommunityBalance := decimal.NewFromInt(response.GamificationScore)
+	newCommunityBalance := decimal.NewFromInt(response.User.GamificationScore)
 
 	if user.CommunityBalance.IsZero() && user.TotalCommunity.IsZero() {
 		if err := db.DB(ctx).Model(&user).UpdateColumns(map[string]interface{}{
