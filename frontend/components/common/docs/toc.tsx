@@ -83,7 +83,7 @@ export function TableOfContents({ content, className }: TableOfContentsProps) {
         }
       },
       {
-        rootMargin: '-80px 0px -80% 0px',
+        rootMargin: '-20px 0px -80% 0px',
         threshold: [0, 1]
       }
     );
@@ -106,7 +106,7 @@ export function TableOfContents({ content, className }: TableOfContentsProps) {
     e.preventDefault();
     const element = document.getElementById(id);
     if (element) {
-      const offset = 80;
+      const offset = 20;
       const bodyRect = document.body.getBoundingClientRect().top;
       const elementRect = element.getBoundingClientRect().top;
       const elementPosition = elementRect - bodyRect;
@@ -125,7 +125,7 @@ export function TableOfContents({ content, className }: TableOfContentsProps) {
   return (
     <div className={cn("space-y-4", className)}>
       <div className="text-sm font-medium text-foreground pl-3">在此页</div>
-      <ScrollArea className="h-[calc(100vh-12rem)]" ref={scrollAreaRef}>
+      <ScrollArea className="h-[calc(100vh-10rem)]" ref={scrollAreaRef}>
         <nav className="space-y-1 border-l border-border/40 pl-3 pr-4">
           {toc.map((item) => (
             <a

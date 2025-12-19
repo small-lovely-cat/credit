@@ -120,7 +120,7 @@ export function Transfer() {
     <div className="space-y-4">
       <div className="bg-muted/50 rounded-lg px-6 py-8">
         <div className="max-w-2xl">
-          <h2 className="text-3xl font-bold mb-4 text-foreground">开始转移</h2>
+          <h2 className="text-2xl font-bold mb-4 text-foreground">开始转移</h2>
           <p className="text-muted-foreground mb-6 leading-relaxed">
             快速、安全地将积分转移给其他用户，支持实时到账，积分即刻可用。
           </p>

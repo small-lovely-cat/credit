@@ -95,7 +95,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       />
     ),
     h1: ({ className, children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-      <h1 className={cn("group flex items-center gap-2 scroll-m-20 text-3xl font-bold tracking-tight lg:text-4xl mb-8 mt-2", className)} {...props}>
+      <h1 className={cn("group flex items-center gap-2 scroll-m-20 text-3xl font-bold tracking-tight lg:text-4xl mb-8", className)} {...props}>
         {children}
       </h1>
     ),
@@ -138,7 +138,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   };
 
   return (
-    <article className="max-w-none" >
+    <article className="max-w-none [&>:first-child]:mt-0" >
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeSlug]}

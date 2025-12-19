@@ -120,7 +120,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="flex h-12 hover:bg-accent group-data-[collapsible=icon]"
+                className="flex h-12 hover:bg-accent group-data-[collapsible=icon]:ml-2"
                 suppressHydrationWarning
               >
                 <Avatar className="size-6 rounded">

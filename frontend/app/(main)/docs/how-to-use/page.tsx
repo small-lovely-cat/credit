@@ -4,10 +4,9 @@ import { MarkdownRenderer } from "@/components/common/docs/markdown-renderer"
 import { TableOfContents } from "@/components/common/docs/toc"
 
 const CONTENT = `
-> 为社区开发者与用户提供完整的平台使用说明
-
 ## 1. 快速开始
-
+> 为社区开发者与用户提供完整的平台使用说明
+ 
 - 身份认证：基于 LINUX DO Connect (OAuth)
 - 认证方式：账户积分消耗认证
 - 手续费：动态费率，由服务方承担
@@ -159,13 +158,13 @@ const CONTENT = `
 
 export default function HowToUsePage() {
   return (
-    <div className="container max-w-8xl mx-auto px-4 py-8 lg:px-8">
+    <div className="py-6">
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_240px] gap-10">
         <main className="min-w-0 pb-[60vh]">
           <MarkdownRenderer content={CONTENT} />
         </main>
         <aside className="hidden lg:block relative">
-          <div className="sticky top-24">
+          <div className="sticky top-6">
             <TableOfContents content={CONTENT} />
           </div>
         </aside>

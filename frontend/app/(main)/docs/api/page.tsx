@@ -156,13 +156,13 @@ curl -X POST https://credit.linux.do/epay/pay/submit.php \\
 
 export default function ApiDocPage() {
   return (
-    <div className="container max-w-8xl mx-auto px-4 py-8 lg:px-8">
+    <div className="py-6">
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_240px] gap-10">
         <main className="min-w-0 pb-[60vh]">
           <MarkdownRenderer content={API_DOC} />
         </main>
         <aside className="hidden lg:block relative">
-          <div className="sticky top-24">
+          <div className="sticky top-6">
             <TableOfContents content={API_DOC} />
           </div>
         </aside>
