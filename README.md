@@ -4,8 +4,8 @@
 
 [中文](./README_zh.md)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Go Version](https://img.shields.io/badge/Go-1.24-blue.svg)](https://golang.org/)
+[![License: Apache2.0](https://img.shields.io/badge/License-Apache2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Go Version](https://img.shields.io/badge/Go-1.25.5-blue.svg)](https://golang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-blue.svg)](https://reactjs.org/)
 
