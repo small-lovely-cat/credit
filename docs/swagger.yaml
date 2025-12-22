@@ -365,7 +365,7 @@ definitions:
 info:
   contact: {}
   title: LINUX DO Credit
-  version: 0.1.0
+  version: 1.0.0
 paths:
   /api.php:
     get:
@@ -605,6 +605,51 @@ paths:
             $ref: '#/definitions/util.ResponseAny'
       tags:
       - config
+  /api/v1/dashboard/stats/daily:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 查询天数，最大7天
+        in: query
+        name: days
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.ResponseAny'
+      summary: 获取每日收支统计
+      tags:
+      - dashboard
+  /api/v1/dashboard/stats/top-customers:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 查询天数，最大7天
+        in: query
+        name: days
+        required: true
+        type: integer
+      - description: 返回数量，最大10
+        in: query
+        name: limit
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.ResponseAny'
+      summary: 获取Top客户
+      tags:
+      - dashboard
   /api/v1/health:
     get:
       produces:

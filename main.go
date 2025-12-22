@@ -19,7 +19,7 @@ package main
 import "github.com/linux-do/credit/internal/cmd"
 
 // @title LINUX DO Credit
-// @version 0.1.0
+// @version 1.0.0
 func main() {
-	cmd.Execute()
+    cmd.Execute()
 }

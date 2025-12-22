@@ -42,6 +42,7 @@ import (
 	_ "github.com/linux-do/credit/docs"
 	"github.com/linux-do/credit/internal/apps/admin/system_config"
 	"github.com/linux-do/credit/internal/apps/admin/user_pay_config"
+	"github.com/linux-do/credit/internal/apps/dashboard"
 	"github.com/linux-do/credit/internal/apps/health"
 	"github.com/linux-do/credit/internal/apps/oauth"
 	"github.com/linux-do/credit/internal/apps/order"
@@ -136,6 +137,14 @@ func Serve() {
 			userRouter.Use(oauth.LoginRequired())
 			{
 				userRouter.PUT("/pay-key", user.UpdatePayKey)
+			}
+
+			// Dashboard
+			dashboardRouter := apiV1Router.Group("/dashboard")
+			dashboardRouter.Use(oauth.LoginRequired())
+			{
+				dashboardRouter.GET("/stats/daily", dashboard.GetDailyStats)
+				dashboardRouter.GET("/stats/top-customers", dashboard.GetTopCustomers)
 			}
 
 			// Order
