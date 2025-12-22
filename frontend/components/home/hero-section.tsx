@@ -71,7 +71,7 @@ export const HeroSection = React.memo(function HeroSection({ className }: HeroSe
                 </Button>
               </Link>
 
-              <Link href="/" className="w-full sm:w-auto">
+              <Link href="/docs/how-to-use" className="w-full sm:w-auto">
                 <Button
                   variant="secondary"
                   size="lg"

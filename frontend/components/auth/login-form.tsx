@@ -24,7 +24,8 @@ import { SquareArrowUpRight } from 'lucide-react';
 
 import { cn } from "@/lib/utils"
 import services from "@/lib/services"
-import { termsSections, privacySections } from "./login-policies"
+import { termsSections } from "@/components/common/docs/terms"
+import { privacySections } from "@/components/common/docs/privacy"
 
 
 /**

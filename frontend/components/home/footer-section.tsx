@@ -51,10 +51,10 @@ export const FooterSection = React.memo(function FooterSection({ className }: Fo
           <div className="lg:col-span-2">
             <h3 className="font-semibold text-foreground mb-6">资源</h3>
             <ul className="space-y-4 text-sm text-muted-foreground">
+              <li><FooterLink href="/docs/newest">最新动态</FooterLink></li>
               <li><FooterLink href="/docs/how-to-use">帮助文档</FooterLink></li>
               <li><FooterLink href="https://linux.do/">社区动态</FooterLink></li>
-              <li><FooterLink href="#">状态监控</FooterLink></li>
-              <li><FooterLink href="#">开源贡献</FooterLink></li>
+              <li><FooterLink href="https://github.com/linux-do/credit/">开源贡献</FooterLink></li>
             </ul>
           </div>
 

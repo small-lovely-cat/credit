@@ -243,7 +243,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       tooltip={item.title}
                       asChild
                     >
-                      <Link href={item.url}>
+                      <Link href={item.url} target="_blank" rel="noopener noreferrer">
                         {item.icon && <item.icon />}
                         <span>{item.title}</span>
                       </Link>
