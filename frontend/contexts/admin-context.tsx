@@ -52,7 +52,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const userPayRequestIdRef = useRef(0)
   const systemRequestIdRef = useRef(0)
 
-  /** 获取用户支付配置列表 */
+  /** 获取用户积分配置列表 */
   const refetchUserPayConfigs = useCallback(async () => {
     const requestId = ++userPayRequestIdRef.current
 
@@ -72,25 +72,25 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
-      const errorObject = handleContextError(error, '加载支付配置失败', { logError: true })
+      const errorObject = handleContextError(error, '加载积分配置失败', { logError: true })
       setUserPayConfigsError(errorObject)
       setUserPayConfigsLoading(false)
     }
   }, [])
 
 
-  /** 更新用户支付配置 */
+  /** 更新用户积分配置 */
   const updateUserPayConfig = useCallback(async (id: number, data: UpdateUserPayConfigRequest) => {
     try {
       await services.admin.updateUserPayConfig(id, data)
       await refetchUserPayConfigs()
     } catch (error) {
-      handleContextError(error, '更新支付配置失败')
+      handleContextError(error, '更新用户积分配置失败')
       throw error
     }
   }, [refetchUserPayConfigs])
 
-  /** 删除用户支付配置 */
+  /** 删除用户积分配置 */
   const deleteUserPayConfig = useCallback(async (id: number) => {
     await services.admin.deleteUserPayConfig(id)
     await refetchUserPayConfigs()

@@ -2,16 +2,95 @@ import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { Eye, EyeOff, RefreshCcw } from "lucide-react"
+import { Eye, EyeOff } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { DisputeService, TransactionService } from "@/lib/services"
-import type { DisputeWithOrder, Order } from "@/lib/services"
+import { DisputeService, TransactionService, DashboardService } from "@/lib/services"
+import type { DisputeWithOrder, Order, DailyStatsItem, TopCustomer } from "@/lib/services"
 import { RefundReviewDialog, CancelDisputeDialog } from "@/components/common/general/table-data"
 import { CountingNumber } from '@/components/animate-ui/primitives/texts/counting-number'
 import { useDisputeData } from "@/hooks/use-dispute"
 import { DisputeDialog } from "@/components/common/home/dispute-dialog"
 import { useRouter } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
+import { Progress } from "@/components/ui/progress"
+
+import { Spinner } from "@/components/ui/spinner"
+
+function AnimatedProgressBar({ value, className }: { value: number, className?: string }) {
+  const [progress, setProgress] = React.useState(0)
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => setProgress(value), 100)
+    return () => clearTimeout(timer)
+  }, [value])
+
+  return (
+    <Progress
+      value={progress}
+      className={cn("h-2 bg-muted", className)}
+    />
+  )
+}
+
+interface OverviewCardProps {
+  title: string
+  titleExtra?: React.ReactNode
+  headerExtra?: React.ReactNode
+  action?: React.ReactNode
+  loading?: boolean
+  onRefresh?: () => void
+  onViewAll?: () => void
+  children: React.ReactNode
+  className?: string
+}
+
+function OverviewCard({
+  title,
+  titleExtra,
+  headerExtra,
+  action,
+  loading,
+  onRefresh,
+  onViewAll,
+  children,
+  className
+}: OverviewCardProps) {
+  return (
+    <Card className={cn("bg-background border-0 shadow-none rounded-lg min-h-[200px] flex flex-col h-full", className)}>
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4 h-6">
+            <CardTitle className="text-sm font-medium">{title}</CardTitle>
+            {titleExtra && <div className="font-semibold">{titleExtra}</div>}
+          </div>
+          <div className="flex items-center gap-2">
+            {action}
+            {onRefresh && (
+              <Button variant="ghost" size="icon" className="size-4" onClick={onRefresh} disabled={loading}>
+                <Spinner className={cn("size-3.5", !loading && "animate-none")} />
+              </Button>
+            )}
+          </div>
+        </div>
+        {headerExtra && <div className="pt-1">{headerExtra}</div>}
+      </CardHeader>
+      <CardContent className="relative flex-1 -mt-4">
+        {children}
+      </CardContent>
+      <CardFooter className="border-t h-8">
+        <div className="flex items-center justify-between text-xs text-muted-foreground w-full">
+          <span>更新时间：{new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</span>
+          {onViewAll && (
+            <Button variant="link" className="h-4 px-0 text-xs text-blue-600" disabled={loading} onClick={onViewAll}>
+              查看全部
+            </Button>
+          )}
+        </div>
+      </CardFooter>
+    </Card>
+  )
+}
 
 /**
  * 创建争议对象
@@ -49,7 +128,7 @@ const createDisputeOrder = (dispute: DisputeWithOrder, type: 'receive' | 'paymen
  */
 const DisputeListSkeleton = () => (
   <div className="space-y-1">
-    {Array.from({ length: 5 }).map((_, index) => (
+    {Array.from({ length: 7 }).map((_, index) => (
       <div key={`skeleton-${ index }`} className="flex items-center justify-between py-1 px-2 rounded-md bg-muted/50">
         <div className="flex-1 min-w-0">
           <Skeleton className="h-3 w-32 mb-1" />
@@ -68,7 +147,7 @@ const DisputeListSkeleton = () => (
  */
 const PaymentListSkeleton = () => (
   <div className="space-y-1">
-    {Array.from({ length: 5 }).map((_, index) => (
+    {Array.from({ length: 7 }).map((_, index) => (
       <div key={`payment-skeleton-${ index }`} className="flex items-center justify-between py-1 px-2 rounded-md bg-muted/50">
         <div className="flex-1 min-w-0">
           <Skeleton className="h-3 w-32 mb-1" />
@@ -150,217 +229,349 @@ function PaymentCard({ onViewAll }: { onViewAll: () => void }) {
   }, [fetchPayments])
 
   return (
-    <Card className="bg-background border-0 shadow-none rounded-lg min-h-[200px] flex flex-col h-full">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <CardTitle className="text-sm font-medium">活动</CardTitle>
-            <p className="font-semibold">{loading ? '-' : <CountingNumber number={total} decimalPlaces={0} />}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="size-4" onClick={() => setIsHidden(!isHidden)}>
-              {isHidden ? <EyeOff className="size-3" /> : <Eye className="size-3" />}
-            </Button>
-            <Button variant="ghost" size="icon" className="size-4" onClick={fetchPayments}>
-              <RefreshCcw className="size-4" />
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="relative flex-1 -mt-4">
-        <ScrollArea className="h-46">
-          {loading ? (
-            <PaymentListSkeleton />
-          ) : payments.length > 0 ? (
-            <div className="space-y-1">
-              {payments.map((payment) => (
-                <div key={`payment-${ payment.id }`} className="flex items-center justify-between py-1 px-2 rounded-md bg-muted/50">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium truncate leading-tight">{payment.order_name}</p>
-                    <p className="text-[10px] text-muted-foreground leading-tight">LDC {payment.amount}</p>
-                  </div>
-                  <Badge variant={getStatusVariant(payment.status)} className="text-[10px] px-1.5 py-0 ml-2">
-                    {getStatusText(payment.status)}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="h-46 flex items-center justify-center">
-              <p className="text-muted-foreground text-xs">暂无积分活动记录</p>
-            </div>
-          )}
-        </ScrollArea>
 
-        {isHidden && (
-          <div className="absolute inset-0 backdrop-blur-md bg-background/30 rounded-lg flex items-center justify-center">
-            <EyeOff className="h-8 w-8 text-muted-foreground/50" />
+    <OverviewCard
+      title="活动"
+      titleExtra={loading ? '-' : <CountingNumber number={total} decimalPlaces={0} />}
+      loading={loading}
+      onRefresh={fetchPayments}
+      onViewAll={onViewAll}
+      action={
+        <Button variant="ghost" size="icon" className="size-4" onClick={() => setIsHidden(!isHidden)}>
+          {isHidden ? <EyeOff className="size-3" /> : <Eye className="size-3" />}
+        </Button>
+      }
+    >
+      <ScrollArea className="h-46">
+        {loading ? (
+          <PaymentListSkeleton />
+        ) : payments.length > 0 ? (
+          <div className="space-y-1">
+            {payments.map((payment) => (
+              <div key={`payment-${ payment.id }`} className="flex items-center justify-between py-1 px-2 rounded-md bg-muted/50">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium truncate leading-tight">{payment.order_name}</p>
+                  <p className="text-[10px] text-muted-foreground leading-tight">LDC {payment.amount}</p>
+                </div>
+                <Badge variant={getStatusVariant(payment.status)} className="text-[10px] px-1.5 py-0 ml-2">
+                  {getStatusText(payment.status)}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="h-46 flex items-center justify-center">
+            <p className="text-muted-foreground text-xs">暂无积分活动记录</p>
           </div>
         )}
-      </CardContent>
-      <CardFooter className="border-t h-8">
-        <div className="flex items-center justify-between text-xs text-muted-foreground w-full">
-          <span>更新时间：{new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</span>
-          <Button variant="link" className="h-4 px-0 text-xs text-blue-600" disabled={loading} onClick={onViewAll}>
-            查看全部
-          </Button>
+      </ScrollArea>
+
+      {isHidden && (
+        <div className="absolute inset-0 backdrop-blur-md bg-background/30 rounded-lg flex items-center justify-center">
+          <EyeOff className="h-8 w-8 text-muted-foreground/50" />
         </div>
-      </CardFooter>
-    </Card>
+      )}
+    </OverviewCard>
   )
 }
 
 /**
- * 积分总额卡片
- * 用于显示积分总额数据（所有成功活动的积分总额）
+ * 收入统计卡片
+ * 用于显示每日收入统计
  * 
- * @returns 积分总额列表卡片
+ * @returns 收入统计卡片
  */
-function TotalCard() {
-  const [total, setTotal] = React.useState<number>(0)
+function IncomeStatsCard() {
+  const [stats, setStats] = React.useState<DailyStatsItem[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [days] = React.useState(7)
 
-  const fetchTotal = React.useCallback(async () => {
+  const fetchDailyStats = React.useCallback(async () => {
     try {
       setLoading(true)
-      const response = await TransactionService.getTransactions({ page: 1, page_size: 100, status: 'success' })
-      const total = response.orders.reduce((sum, order) => sum + parseFloat(order.amount || '0'), 0)
-      setTotal(total)
+      const data = await DashboardService.getDailyStats(days)
+      setStats(data)
     } catch (error) {
-      console.error('Failed to fetch total:', error)
+      console.error('Failed to fetch daily stats:', error)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [days])
 
   React.useEffect(() => {
-    fetchTotal()
-  }, [fetchTotal])
+    fetchDailyStats()
+  }, [fetchDailyStats])
+
+  // 计算总收入
+  const totalIncome = stats.reduce((sum, stat) => sum + parseFloat(stat.income || '0'), 0)
+
+  // 找出最大收入值用于比例计算
+  const maxIncome = Math.max(...stats.map(s => parseFloat(s.income || '0')))
 
   return (
-    <Card className="bg-background border-0 shadow-none rounded-lg min-h-[200px] flex flex-col h-full">
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-medium">积分</CardTitle>
-          <Button variant="ghost" size="icon" className="size-4" onClick={fetchTotal}>
-            <RefreshCcw className="size-4" />
-          </Button>
-        </div>
+    <OverviewCard
+      title="收入统计"
+      headerExtra={
         <div className="text-xl font-semibold">
           {loading ? (
             <Skeleton className="h-6 w-24" />
           ) : (
-            <>LDC <CountingNumber number={total} decimalPlaces={2} /></>
+            <>LDC <CountingNumber number={totalIncome} decimalPlaces={2} /></>
           )}
         </div>
-      </CardHeader>
-      <CardContent className="flex-1">
-        <div className="h-[120px] w-full flex items-center justify-center border border-dashed rounded-lg">
-          <p className="text-xs text-muted-foreground">图表暂时不可用</p>
+      }
+      loading={loading}
+      onRefresh={fetchDailyStats}
+    >
+      {loading ? (
+        <ScrollArea className="h-46 w-full">
+          <div className="space-y-1.5 pr-3">
+            {Array.from({ length: 7 }).map((_, index) => (
+              <div key={`income-skeleton-${ index }`} className="space-y-0.5">
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-3 w-10" />
+                  <Skeleton className="h-3 w-12" />
+                </div>
+                <Skeleton className="h-2 w-full rounded-sm" />
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+      ) : stats.length > 0 ? (
+        <ScrollArea className="h-46 w-full">
+          <div className="space-y-1.5 pr-3">
+            {stats.slice().reverse().map((stat, index) => {
+              const income = parseFloat(stat.income || '0')
+              const incomeWidth = maxIncome > 0 ? (income / maxIncome) * 100 : 0
+
+              return (
+                <div key={stat.date || index} className="space-y-0.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-muted-foreground">
+                      {new Date(stat.date).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}
+                    </span>
+                    <span className="text-[10px] text-green-600 font-medium">
+                      +{income.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="bg-muted rounded-sm overflow-hidden h-2">
+                    <AnimatedProgressBar
+                      value={incomeWidth}
+                      className="h-full rounded-sm [&>[data-slot=progress-indicator]]:bg-green-500/80"
+                    />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </ScrollArea>
+      ) : (
+        <div className="h-46 w-full flex items-center justify-center border border-dashed rounded-lg">
+          <p className="text-xs text-muted-foreground">暂无统计数据</p>
         </div>
-      </CardContent>
-      <CardFooter className="border-t h-8">
-        <span className="text-xs text-muted-foreground">
-          更新时间：{new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
-        </span>
-      </CardFooter>
-    </Card>
+      )}
+    </OverviewCard>
   )
 }
 
 /**
- * 净积分值卡片
- * 用于显示净积分值数据（积分收益 - 积分消耗）
+ * 支出统计卡片
+ * 用于显示每日支出统计
  * 
- * @returns 净积分值列表卡片
+ * @returns 支出统计卡片
  */
-function NetVolumeCard() {
-  const [netAmount, setNetAmount] = React.useState<number>(0)
+function ExpenseStatsCard() {
+  const [stats, setStats] = React.useState<DailyStatsItem[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [days] = React.useState(7)
 
-  const fetchNetVolume = React.useCallback(async () => {
+  const fetchDailyStats = React.useCallback(async () => {
     try {
       setLoading(true)
-      const [receiveResponse, paymentResponse] = await Promise.all([
-        TransactionService.getTransactions({ page: 1, page_size: 100, type: 'receive', status: 'success' }),
-        TransactionService.getTransactions({ page: 1, page_size: 100, type: 'payment', status: 'success' })
-      ])
-      const receiveTotal = receiveResponse.orders.reduce((sum, order) => sum + parseFloat(order.amount || '0'), 0)
-      const paymentTotal = paymentResponse.orders.reduce((sum, order) => sum + parseFloat(order.amount || '0'), 0)
-      setNetAmount(receiveTotal - paymentTotal)
+      const data = await DashboardService.getDailyStats(days)
+      setStats(data)
     } catch (error) {
-      console.error('Failed to fetch net volume:', error)
+      console.error('Failed to fetch daily stats:', error)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [days])
 
   React.useEffect(() => {
-    fetchNetVolume()
-  }, [fetchNetVolume])
+    fetchDailyStats()
+  }, [fetchDailyStats])
+
+  /* 计算总支出 */
+  const totalExpense = stats.reduce((sum, stat) => sum + parseFloat(stat.expense || '0'), 0)
+
+  /* 找出最大支出值用于比例计算 */
+  const maxExpense = Math.max(...stats.map(s => parseFloat(s.expense || '0')))
 
   return (
-    <Card className="bg-background border-0 shadow-none rounded-lg min-h-[200px] flex flex-col h-full">
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-medium">净积分值</CardTitle>
-          <Button variant="ghost" size="icon" className="size-4" onClick={fetchNetVolume}>
-            <RefreshCcw className="size-4" />
-          </Button>
-        </div>
+    <OverviewCard
+      title="支出统计"
+      headerExtra={
         <div className="text-xl font-semibold">
           {loading ? (
             <Skeleton className="h-6 w-24" />
           ) : (
-            <>
-              LDC <CountingNumber number={Math.abs(netAmount)} decimalPlaces={2} />
-              {netAmount < 0 && <span className="text-destructive ml-1">(赤字)</span>}
-            </>
+            <>LDC <CountingNumber number={totalExpense} decimalPlaces={2} /></>
           )}
         </div>
-      </CardHeader>
-      <CardContent className="flex-1">
-        <div className="h-[120px] w-full flex items-center justify-center border border-dashed rounded-lg">
-          <p className="text-xs text-muted-foreground">图表暂时不可用</p>
+      }
+      loading={loading}
+      onRefresh={fetchDailyStats}
+    >
+      {loading ? (
+        <ScrollArea className="h-46 w-full">
+          <div className="space-y-1.5 pr-3">
+            {Array.from({ length: 7 }).map((_, index) => (
+              <div key={`expense-skeleton-${ index }`} className="space-y-0.5">
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-3 w-10" />
+                  <Skeleton className="h-3 w-12" />
+                </div>
+                <Skeleton className="h-2 w-full rounded-sm" />
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+      ) : stats.length > 0 ? (
+        <ScrollArea className="h-46 w-full">
+          <div className="space-y-1.5 pr-3">
+            {stats.slice().reverse().map((stat, index) => {
+              const expense = parseFloat(stat.expense || '0')
+              const expenseWidth = maxExpense > 0 ? (expense / maxExpense) * 100 : 0
+
+              return (
+                <div key={stat.date || index} className="space-y-0.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-muted-foreground">
+                      {new Date(stat.date).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}
+                    </span>
+                    <span className="text-[10px] text-red-600 font-medium">
+                      -{expense.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="bg-muted rounded-sm overflow-hidden h-2">
+                    <AnimatedProgressBar
+                      value={expenseWidth}
+                      className="h-full rounded-sm [&>[data-slot=progress-indicator]]:bg-red-500/80"
+                    />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </ScrollArea>
+      ) : (
+        <div className="h-46 w-full flex items-center justify-center border border-dashed rounded-lg">
+          <p className="text-xs text-muted-foreground">暂无统计数据</p>
         </div>
-      </CardContent>
-      <CardFooter className="border-t h-8">
-        <span className="text-xs text-muted-foreground">
-          更新时间：{new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
-        </span>
-      </CardFooter>
-    </Card>
+      )}
+    </OverviewCard>
   )
 }
 
+
+
 /**
- * 积分消耗最多的佬友卡片
- * 用于显示积分消耗最多的佬友数据
+ * Top 客户卡片
+ * 用于显示向当前用户付款最多的客户排行
  *
- * @returns 积分消耗最多的佬友卡片
+ * @returns Top 客户卡片
  */
 function TopCustomersCard() {
+  const [customers, setCustomers] = React.useState<TopCustomer[]>([])
+  const [loading, setLoading] = React.useState(true)
+  const [days] = React.useState(7)
+  const [limit] = React.useState(5)
+
+  const fetchTopCustomers = React.useCallback(async () => {
+    try {
+      setLoading(true)
+      const data = await DashboardService.getTopCustomers(days, limit)
+      setCustomers(data)
+    } catch (error) {
+      console.error('Failed to fetch top customers:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [days, limit])
+
+  React.useEffect(() => {
+    fetchTopCustomers()
+  }, [fetchTopCustomers])
+
+  /* 找出最大金额用于显示进度条 */
+  const maxAmount = customers && customers.length > 0
+    ? Math.max(...customers.map(c => parseFloat(c.total_amount || '0')))
+    : 0
+
   return (
-    <Card className="bg-background border-0 shadow-none rounded-lg min-h-[200px] flex flex-col h-full">
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between">
-          <CardTitle className="text-sm font-medium">积分收益排行</CardTitle>
-          <Button variant="ghost" size="icon" className="size-4">
-            <RefreshCcw className="size-4" />
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="flex-1">
-        <div className="space-y-3">
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-12 w-full" />
-        </div>
-      </CardContent>
-      <CardFooter className="border-t h-8">
-        <span className="text-xs text-muted-foreground">更新时间：上午12:29</span>
-      </CardFooter>
-    </Card>
+    <OverviewCard
+      title="Top 客户统计"
+      loading={loading}
+      onRefresh={fetchTopCustomers}
+    >
+      <ScrollArea className="h-46">
+        {loading ? (
+          <div className="space-y-2">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <div key={`customer-skeleton-${ index }`} className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-3 w-6" />
+                    <Skeleton className="h-3 w-20" />
+                  </div>
+                  <Skeleton className="h-3 w-16" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-2 w-full rounded-full" />
+                  <Skeleton className="h-3 w-8" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : customers && customers.length > 0 ? (
+          <div className="space-y-2 pr-3">
+            {customers.map((customer, index) => {
+              const amount = parseFloat(customer.total_amount || '0')
+              const percentage = maxAmount > 0 ? (amount / maxAmount) * 100 : 0
+
+              return (
+                <div key={customer.user_id} className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <span className="text-xs font-semibold text-muted-foreground shrink-0">#{index + 1}</span>
+                      <span className="text-xs font-medium truncate">{customer.username}</span>
+                    </div>
+                    <div className="text-xs font-semibold shrink-0 ml-2">
+                      {amount.toFixed(2)} LDC
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <AnimatedProgressBar
+                        value={percentage}
+                        className="h-2 rounded-full"
+                      />
+                    </div>
+                    <span className="text-[10px] text-muted-foreground shrink-0 w-8 text-right">
+                      {customer.order_count}单
+                    </span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="h-46 flex items-center justify-center">
+            <p className="text-xs text-muted-foreground">暂无客户数据</p>
+          </div>
+        )}
+      </ScrollArea>
+    </OverviewCard>
   )
 }
 
@@ -376,52 +587,37 @@ function PendingDisputesCard({ onViewAll }: { onViewAll: () => void }) {
   })
 
   return (
-    <Card className="bg-background border-0 shadow-none rounded-lg min-h-[200px] flex flex-col h-full">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <CardTitle className="text-sm font-medium">待处理的争议</CardTitle>
-            <p className="font-semibold">{loading ? '-' : <CountingNumber number={disputes.count} decimalPlaces={0} />}</p>
-          </div>
-          <Button variant="ghost" size="icon" className="size-4" onClick={handleRefresh}>
-            <RefreshCcw className="size-4" />
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="flex-1 -mt-4">
-        <ScrollArea className="h-46">
-          {loading ? (
-            <DisputeListSkeleton />
-          ) : disputes.list.length > 0 ? (
-            <div className="space-y-1">
-              {disputes.list.map((dispute) => (
-                <div key={`merchant-${ dispute.id }`} className="flex items-center justify-between py-1 px-2 rounded-md bg-muted/50">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium truncate leading-tight">{dispute.order_name}</p>
-                    <p className="text-[10px] text-muted-foreground leading-tight">{dispute.payee_username}</p>
-                  </div>
-                  <div className="ml-2">
-                    <RefundReviewDialog order={createDisputeOrder(dispute, 'receive')} onSuccess={refetchData} />
-                  </div>
+    <OverviewCard
+      title="待处理的争议"
+      titleExtra={loading ? '-' : <CountingNumber number={disputes.count} decimalPlaces={0} />}
+      loading={loading}
+      onRefresh={handleRefresh}
+      onViewAll={onViewAll}
+    >
+      <ScrollArea className="h-46">
+        {loading ? (
+          <DisputeListSkeleton />
+        ) : disputes.list.length > 0 ? (
+          <div className="space-y-1">
+            {disputes.list.map((dispute) => (
+              <div key={`merchant-${ dispute.id }`} className="flex items-center justify-between py-1 px-2 rounded-md bg-muted/50">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium truncate leading-tight">{dispute.order_name}</p>
+                  <p className="text-[10px] text-muted-foreground leading-tight">{dispute.payee_username}</p>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="h-46 flex items-center justify-center">
-              <p className="text-muted-foreground text-xs">暂无待处理的积分活动争议</p>
-            </div>
-          )}
-        </ScrollArea>
-      </CardContent>
-      <CardFooter className="border-t h-8">
-        <div className="flex items-center justify-between text-xs text-muted-foreground w-full">
-          <span>更新时间：{new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</span>
-          <Button variant="link" className="h-4 px-0 text-xs text-blue-600" disabled={loading} onClick={onViewAll}>
-            查看全部
-          </Button>
-        </div>
-      </CardFooter>
-    </Card>
+                <div className="ml-2">
+                  <RefundReviewDialog order={createDisputeOrder(dispute, 'receive')} onSuccess={refetchData} />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="h-46 flex items-center justify-center">
+            <p className="text-muted-foreground text-xs">暂无待处理的积分活动争议</p>
+          </div>
+        )}
+      </ScrollArea>
+    </OverviewCard>
   )
 }
 
@@ -437,52 +633,37 @@ function MyDisputesCard({ onViewAll }: { onViewAll: () => void }) {
   })
 
   return (
-    <Card className="bg-background border-0 shadow-none rounded-lg min-h-[200px] flex flex-col h-full">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <CardTitle className="text-sm font-medium">我发起的争议</CardTitle>
-            <p className="font-semibold">{loading ? '-' : <CountingNumber number={disputes.count} decimalPlaces={0} />}</p>
-          </div>
-          <Button variant="ghost" size="icon" className="size-4" onClick={handleRefresh}>
-            <RefreshCcw className="size-4" />
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="flex-1 -mt-4">
-        <ScrollArea className="h-46">
-          {loading ? (
-            <DisputeListSkeleton />
-          ) : disputes.list.length > 0 ? (
-            <div className="space-y-1">
-              {disputes.list.map((dispute) => (
-                <div key={`user-${ dispute.id }`} className="flex items-center justify-between py-1 px-2 rounded-md bg-muted/50">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium truncate leading-tight">{dispute.order_name}</p>
-                    <p className="text-[10px] text-muted-foreground leading-tight">积分活动发起者正在处理争议</p>
-                  </div>
-                  <div className="ml-2">
-                    <CancelDisputeDialog order={createDisputeOrder(dispute, 'payment')} onSuccess={refetchData} />
-                  </div>
+    <OverviewCard
+      title="我发起的争议"
+      titleExtra={loading ? '-' : <CountingNumber number={disputes.count} decimalPlaces={0} />}
+      loading={loading}
+      onRefresh={handleRefresh}
+      onViewAll={onViewAll}
+    >
+      <ScrollArea className="h-46">
+        {loading ? (
+          <DisputeListSkeleton />
+        ) : disputes.list.length > 0 ? (
+          <div className="space-y-1">
+            {disputes.list.map((dispute) => (
+              <div key={`user-${ dispute.id }`} className="flex items-center justify-between py-1 px-2 rounded-md bg-muted/50">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium truncate leading-tight">{dispute.order_name}</p>
+                  <p className="text-[10px] text-muted-foreground leading-tight">积分活动发起者正在处理争议</p>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="h-46 flex items-center justify-center text-muted-foreground text-xs">
-              暂无我发起的积分活动争议
-            </div>
-          )}
-        </ScrollArea>
-      </CardContent>
-      <CardFooter className="border-t h-8">
-        <div className="flex items-center justify-between text-xs text-muted-foreground w-full">
-          <span>更新时间：{new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</span>
-          <Button variant="link" className="h-4 px-0 text-xs text-blue-600" disabled={loading} onClick={onViewAll}>
-            查看全部
-          </Button>
-        </div>
-      </CardFooter>
-    </Card>
+                <div className="ml-2">
+                  <CancelDisputeDialog order={createDisputeOrder(dispute, 'payment')} onSuccess={refetchData} />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="h-46 flex items-center justify-center">
+            <p className="text-muted-foreground text-xs">暂无我发起的积分活动争议</p>
+          </div>
+        )}
+      </ScrollArea>
+    </OverviewCard>
   )
 }
 
@@ -516,8 +697,8 @@ export function OverviewPanel() {
       <div className="bg-muted rounded-lg p-2 mt-2">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
           <PaymentCard onViewAll={handleViewAllPayments} />
-          <TotalCard />
-          <NetVolumeCard />
+          <IncomeStatsCard />
+          <ExpenseStatsCard />
           <TopCustomersCard />
           <PendingDisputesCard onViewAll={handleViewAllPending} />
           <MyDisputesCard onViewAll={handleViewAllMyDisputes} />

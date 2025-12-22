@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { ConfigService, PublicConfigResponse } from '@/lib/services'
 
-// 全局缓存
+/* 全局缓存 */
 let cachedConfig: PublicConfigResponse | null = null
 let cachePromise: Promise<PublicConfigResponse> | null = null
 let cacheTime = 0
-const CACHE_DURATION = 5 * 60 * 1000 // 5分钟
+const CACHE_DURATION = 5 * 60 * 1000
 
 /**
  * 获取公共配置（带缓存）
@@ -26,7 +26,6 @@ export function usePublicConfig() {
     const fetchConfig = async () => {
       const now = Date.now()
 
-      // 使用有效缓存
       if (cachedConfig && (now - cacheTime) < CACHE_DURATION) {
         if (mounted) {
           setConfig(cachedConfig)
@@ -35,7 +34,6 @@ export function usePublicConfig() {
         return
       }
 
-      // 共享同一个请求（请求去重）
       if (!cachePromise) {
         cachePromise = ConfigService.getPublicConfig()
       }

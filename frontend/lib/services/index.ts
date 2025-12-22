@@ -27,6 +27,7 @@ import { AdminService } from './admin';
 import { UserService } from './user';
 import { DisputeService } from './dispute';
 import { ConfigService } from './config';
+import { DashboardService } from './dashboard';
 
 /**
  * 服务对象
@@ -50,6 +51,8 @@ const services = {
   dispute: DisputeService,
   /** 配置服务 */
   config: ConfigService,
+  /** 仪表板服务 */
+  dashboard: DashboardService,
 } as const;
 
 export default services;
@@ -144,7 +147,7 @@ export type {
 } from './merchant';
 
 // 管理员服务
-export { AdminService, PayLevel } from './admin';
+export { AdminService } from './admin';
 export type {
   SystemConfig,
   CreateSystemConfigRequest,
@@ -157,5 +160,16 @@ export type {
 // 用户服务
 export { UserService } from './user';
 export type { UpdatePayKeyRequest } from './user';
+
+// 仪表板服务
+export { DashboardService } from './dashboard';
+export type {
+  DailyStatsItem,
+  DailyStatsResponse,
+  GetDailyStatsRequest,
+  TopCustomer,
+  TopCustomersResponse,
+  GetTopCustomersRequest,
+} from './dashboard';
 
 

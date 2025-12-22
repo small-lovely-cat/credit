@@ -251,7 +251,7 @@ export class MerchantService extends BaseService {
    * 订单必须处于待支付状态。
    *
    * @param request - 查询订单请求参数
-   * @returns 订单信息和用户支付配置
+   * @returns 订单信息和用户积分配置
    * @throws {UnauthorizedError} 当用户未登录时
    * @throws {NotFoundError} 当订单不存在时
    * @throws {ValidationError} 当订单号格式错误时
@@ -267,7 +267,7 @@ export class MerchantService extends BaseService {
    *   try {
    *     const orderInfo = await MerchantService.getMerchantOrder({ order_no: orderNo });
    *     console.log('订单信息:', orderInfo.order);
-   *     console.log('支付配置:', orderInfo.user_pay_config);
+   *     console.log('积分配置:', orderInfo.user_pay_config);
    *   } catch (error) {
    *     console.error('查询订单失败:', error.message);
    *   }
@@ -276,7 +276,7 @@ export class MerchantService extends BaseService {
    *
    * @remarks
    * - 订单必须处于待支付状态
-   * - 返回的用户支付配置包含手续费率等信息
+   * - 返回的用户积分配置包含手续费率等信息
    */
   static async getMerchantOrder(request: GetMerchantOrderRequest): Promise<GetMerchantOrderResponse> {
     return this.get<GetMerchantOrderResponse>('/payment/order', { order_no: request.order_no });
@@ -320,7 +320,7 @@ export class MerchantService extends BaseService {
    * - 用户不能支付自己作为商户创建的订单
    * - 订单必须在有效期内（5分钟）
    * - 用户余额必须充足
-   * - 支付成功后会扣除手续费（根据用户的支付等级）
+   * - 支付成功后会扣除手续费（根据用户的积分等级）
    */
   static async payMerchantOrder(request: PayMerchantOrderRequest): Promise<void> {
     return this.post<void>('/payment', request);

@@ -22,8 +22,8 @@ export const FooterSection = React.memo(function FooterSection({ className }: Fo
 
           <div className="lg:col-span-4 space-y-6">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 p-2 rounded bg-primary text-primary-foreground flex items-center justify-center font-bold">
-                LDP
+              <div className="w-10 h-10 p-2 rounded bg-primary text-sm text-primary-foreground flex items-center justify-center font-bold">
+                LDC
               </div>
               <span className="text-2xl font-bold tracking-tight text-foreground">LINUX DO Credit</span>
             </Link>

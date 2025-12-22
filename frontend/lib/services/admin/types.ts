@@ -1,3 +1,5 @@
+import type { PayLevel } from '@/lib/services/auth/types';
+
 /**
  * 系统配置信息
  */
@@ -37,22 +39,12 @@ export interface UpdateSystemConfigRequest {
 }
 
 /**
- * 支付等级枚举
- */
-export enum PayLevel {
-  Free = 0,
-  Basic = 1,
-  Standard = 2,
-  Premium = 3,
-}
-
-/**
- * 用户支付配置信息
+ * 用户积分配置信息
  */
 export interface UserPayConfig {
   /** 配置ID */
   id: number;
-  /** 支付等级 */
+  /** 积分等级 */
   level: PayLevel;
   /** 最低分数 */
   min_score: number;
@@ -62,6 +54,8 @@ export interface UserPayConfig {
   daily_limit: number | null;
   /** 手续费率（0-1之间的小数，最多2位小数） */
   fee_rate: number | string;
+  /** 积分费率（0-1之间的小数，最多2位小数） */
+  score_rate: number | string;
   /** 创建时间 */
   created_at: string;
   /** 更新时间 */
@@ -69,10 +63,10 @@ export interface UserPayConfig {
 }
 
 /**
- * 创建用户支付配置请求参数
+ * 创建用户积分配置请求参数
  */
 export interface CreateUserPayConfigRequest {
-  /** 支付等级 */
+  /** 积分等级 */
   level: PayLevel;
   /** 最低分数（必须 >= 0） */
   min_score: number;
@@ -82,10 +76,12 @@ export interface CreateUserPayConfigRequest {
   daily_limit?: number | null;
   /** 手续费率（0-1之间的小数，最多2位小数） */
   fee_rate: number | string;
+  /** 积分费率（0-1之间的小数，最多2位小数） */
+  score_rate: number | string;
 }
 
 /**
- * 更新用户支付配置请求参数
+ * 更新用户积分配置请求参数
  */
 export interface UpdateUserPayConfigRequest {
   /** 最低分数（必须 >= 0） */
@@ -96,5 +92,7 @@ export interface UpdateUserPayConfigRequest {
   daily_limit?: number | null;
   /** 手续费率（0-1之间的小数，最多2位小数） */
   fee_rate: number | string;
+  /** 积分费率（0-1之间的小数，最多2位小数） */
+  score_rate: number | string;
 }
 

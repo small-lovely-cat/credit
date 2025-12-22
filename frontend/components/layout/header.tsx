@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Bell, Plus, Settings, Search, Grid3x3, Moon, Sun } from "lucide-react"
+import { Bell, Plus, Settings, Search, Moon, Sun } from "lucide-react"
 import { useUser } from "@/contexts/user-context"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { useTheme } from "next-themes"
@@ -32,7 +32,6 @@ export function SiteHeader() {
 
   return (
     <header className="flex h-(--header-height) shrink-0 items-center bg-background px-4 md:px-0">
-      {/* Mobile Layout */}
       <div className="flex w-full items-center justify-between md:hidden">
         <div className="flex items-center gap-2">
           <SidebarTrigger />
@@ -68,10 +67,6 @@ export function SiteHeader() {
         </div>
 
         <div className="ml-auto flex items-center gap-1">
-          <Button variant="ghost" size="icon" className="size-9 text-muted-foreground hover:text-foreground">
-            <Grid3x3 className="size-[18px]" />
-            <span className="sr-only">网格</span>
-          </Button>
           <Button variant="ghost" size="icon" className="size-9 text-muted-foreground hover:text-foreground">
             <Bell className="size-[18px]" />
             <span className="sr-only">通知</span>

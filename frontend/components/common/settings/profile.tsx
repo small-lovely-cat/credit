@@ -9,6 +9,8 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { cn } from "@/lib/utils"
 import { PayLevel, User } from "@/lib/services/auth"
 import { useUser } from "@/contexts/user-context"
+import services from "@/lib/services"
+import type { UserPayConfig } from "@/lib/services/admin"
 
 
 /**
@@ -23,15 +25,17 @@ interface LevelConfig {
   gradient: string
   textColor: string
   metalEffect?: boolean
+  dailyLimit: number | null
+  feeRate: number | string
+  scoreRate: number | string
 }
 
-const LEVEL_CONFIGS: LevelConfig[] = [
+/** 等级视觉样式配置（不包含业务数据） */
+const LEVEL_STYLES = [
   {
     level: PayLevel.BlackGold,
     name: "黑金会员",
     nameEn: "BLACK MEMBER",
-    minScore: 0,
-    maxScore: 1999,
     gradient: "from-slate-800 via-gray-900 to-black",
     textColor: "text-white",
     metalEffect: true,
@@ -40,8 +44,6 @@ const LEVEL_CONFIGS: LevelConfig[] = [
     level: PayLevel.WhiteGold,
     name: "白金会员",
     nameEn: "PLATINUM MEMBER",
-    minScore: 2000,
-    maxScore: 9999,
     gradient: "from-slate-400 via-slate-300 to-slate-400",
     textColor: "text-slate-900",
   },
@@ -49,8 +51,6 @@ const LEVEL_CONFIGS: LevelConfig[] = [
     level: PayLevel.Gold,
     name: "黄金会员",
     nameEn: "GOLD MEMBER",
-    minScore: 10000,
-    maxScore: 49999,
     gradient: "from-[#F3E3B3] via-[#E6D4A3] via-[#F3E3B3] to-[#D4AF37]",
     textColor: "text-amber-950",
   },
@@ -58,20 +58,58 @@ const LEVEL_CONFIGS: LevelConfig[] = [
     level: PayLevel.Platinum,
     name: "铂金会员",
     nameEn: "DIAMOND MEMBER",
-    minScore: 50000,
-    maxScore: null,
     gradient: "from-purple-600 via-pink-500 to-purple-600",
     textColor: "text-white",
   },
-]
+] as const
 
-function getLevelConfig(score: number): LevelConfig {
-  for (let i = LEVEL_CONFIGS.length - 1; i >= 0; i--) {
-    if (score >= LEVEL_CONFIGS[i].minScore) {
-      return LEVEL_CONFIGS[i]
+/** 合并 API 数据和视觉样式 */
+function mergeLevelConfigs(apiConfigs: UserPayConfig[]): LevelConfig[] {
+  return LEVEL_STYLES.map(style => {
+    const apiConfig = apiConfigs.find(c => c.level === style.level)
+    if (apiConfig) {
+      return {
+        ...style,
+        minScore: apiConfig.min_score,
+        maxScore: apiConfig.max_score,
+        dailyLimit: apiConfig.daily_limit,
+        feeRate: apiConfig.fee_rate,
+        scoreRate: apiConfig.score_rate,
+      }
+    }
+    return {
+      ...style,
+      minScore: 0,
+      maxScore: null,
+      dailyLimit: null,
+      feeRate: 0,
+      scoreRate: 0,
+    }
+  })
+}
+
+function getLevelConfig(score: number, configs: LevelConfig[]): LevelConfig {
+  if (configs.length === 0) {
+    return {
+      level: PayLevel.BlackGold,
+      name: "加载中...",
+      nameEn: "LOADING...",
+      gradient: "from-slate-800 via-gray-900 to-black",
+      textColor: "text-white",
+      minScore: 0,
+      maxScore: null,
+      dailyLimit: null,
+      feeRate: 0,
+      scoreRate: 0,
     }
   }
-  return LEVEL_CONFIGS[0]
+
+  for (let i = configs.length - 1; i >= 0; i--) {
+    if (score >= configs[i].minScore) {
+      return configs[i]
+    }
+  }
+  return configs[0]
 }
 
 function MembershipCard({
@@ -80,14 +118,16 @@ function MembershipCard({
   score,
   currentLevel,
   isActive,
+  levelConfigs,
 }: {
   config: LevelConfig
   user: User
   score: number
   currentLevel: LevelConfig
   isActive: boolean
+  levelConfigs: LevelConfig[]
 }) {
-  const isAccessible = LEVEL_CONFIGS.findIndex(l => l.level === config.level) <= LEVEL_CONFIGS.findIndex(l => l.level === currentLevel.level)
+  const isAccessible = levelConfigs.findIndex(l => l.level === config.level) <= levelConfigs.findIndex(l => l.level === currentLevel.level)
   const isDarkCard = config.level === PayLevel.BlackGold || config.level === PayLevel.Platinum
 
   return (
@@ -195,9 +235,18 @@ export function ProfileMain() {
   const { user, loading, getTrustLevelLabel } = useUser()
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
+  const [levelConfigs, setLevelConfigs] = React.useState<LevelConfig[]>([])
 
   const score = user?.pay_score ?? 0
-  const currentLevel = getLevelConfig(score)
+  const currentLevel = getLevelConfig(score, levelConfigs)
+
+  React.useEffect(() => {
+    async function fetchPayConfigs() {
+      const configs = await services.config.getUserPayConfigs()
+      setLevelConfigs(mergeLevelConfigs(configs))
+    }
+    fetchPayConfigs()
+  }, [])
 
   React.useEffect(() => {
     if (!api) return
@@ -208,12 +257,12 @@ export function ProfileMain() {
 
   React.useEffect(() => {
     if (user && api) {
-      const currentLevelIndex = LEVEL_CONFIGS.findIndex(
+      const currentLevelIndex = levelConfigs.findIndex(
         (config) => config.level === currentLevel.level
       )
       api.scrollTo(currentLevelIndex, false)
     }
-  }, [user, currentLevel.level, api])
+  }, [user, currentLevel.level, api, levelConfigs])
 
   if (loading) {
     return (
@@ -265,7 +314,7 @@ export function ProfileMain() {
         <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-background to-transparent pointer-events-none z-10" />
         <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
         <CarouselContent className="-ml-4">
-          {LEVEL_CONFIGS.map((config, index) => (
+          {levelConfigs.map((config, index) => (
             <CarouselItem key={config.level} className="pl-4 basis-[85%] sm:basis-[70%] md:basis-[65%] lg:basis-[50%] xl:basis-[40%] 2xl:basis-[35%]">
               <MembershipCard
                 config={config}
@@ -273,6 +322,7 @@ export function ProfileMain() {
                 score={score}
                 currentLevel={currentLevel}
                 isActive={index === current}
+                levelConfigs={levelConfigs}
               />
             </CarouselItem>
           ))}
@@ -323,6 +373,31 @@ export function ProfileMain() {
               <div className="space-y-1">
                 <div className="text-xs text-muted-foreground">平台分数</div>
                 <div className="text-sm font-medium">{user.pay_score.toLocaleString()}</div>
+              </div>
+
+              <div className="space-y-1">
+                <div className="text-xs text-muted-foreground">每日流转限额</div>
+                <div className="text-sm font-medium">
+                  {currentLevel.dailyLimit ? `${ currentLevel.dailyLimit.toLocaleString() } 积分` : '无限额'}
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <div className="text-xs text-muted-foreground">集市手续费率</div>
+                <div className="text-sm font-medium">
+                  {typeof currentLevel.feeRate === 'number'
+                    ? `${ (currentLevel.feeRate * 100).toFixed(2) }%`
+                    : `${ (parseFloat(currentLevel.feeRate as string) * 100).toFixed(2) }%`}
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <div className="text-xs text-muted-foreground">平台分数转化率</div>
+                <div className="text-sm font-medium">
+                  {typeof currentLevel.scoreRate === 'number'
+                    ? `${ (currentLevel.scoreRate * 100).toFixed(2) }%`
+                    : `${ (parseFloat(currentLevel.scoreRate as string) * 100).toFixed(2) }%`}
+                </div>
               </div>
             </div>
           </div>

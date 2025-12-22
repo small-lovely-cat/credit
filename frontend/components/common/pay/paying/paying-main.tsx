@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { motion } from "motion/react"
 import { PayingNow } from "@/components/common/pay/paying/paying-now"
@@ -18,6 +18,7 @@ import type { GetMerchantOrderResponse } from "@/lib/services"
 export function PayingMain() {
   /** 获取URL参数中的认证编号 */
   const searchParams = useSearchParams()
+  const router = useRouter()
   const encryptedOrderNo = searchParams.get('order_no')
 
   /** 组件状态管理 */
@@ -67,7 +68,6 @@ export function PayingMain() {
       errorMessage.includes(key)
     )?.[1] || errorMessage
 
-    // Use a consistent ID for error toasts to avoid duplicates in Strict Mode
     toast.error(userMessage, { id: 'payment-error' })
   }
 
@@ -159,7 +159,7 @@ export function PayingMain() {
           return
         }
 
-        window.location.reload()
+        router.push('/home')
       }, 5000)
     } catch (error: unknown) {
       handleServiceError(error, "认证")

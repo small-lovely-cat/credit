@@ -117,11 +117,11 @@ export interface GetMerchantOrderResponse {
     /** 更新时间 */
     updated_at: string;
   };
-  /** 用户支付配置信息 */
+  /** 用户积分配置信息 */
   user_pay_config: {
     /** 配置ID */
     id: number;
-    /** 支付等级 */
+    /** 积分等级 */
     level: number;
     /** 最低分数 */
     min_score: number;
@@ -207,11 +207,11 @@ export interface GetPaymentLinkInfoResponse {
     /** 跳转URI */
     redirect_uri: string;
   };
-  /** 用户支付配置信息 */
+  /** 用户积分配置信息 */
   user_pay_config: {
     /** 配置ID */
     id: number;
-    /** 支付等级 */
+    /** 积分等级 */
     level: number;
     /** 最低分数 */
     min_score: number;

@@ -10,7 +10,7 @@ import type {
 
 /**
  * 管理员服务
- * 处理系统配置和用户支付配置管理相关的 API 请求
+ * 处理系统配置和用户积分配置管理相关的 API 请求
  * 
  * @remarks
  * 所有接口都需要管理员权限
@@ -119,12 +119,12 @@ export class AdminService extends BaseService {
     return this.delete<void>(`/system-configs/${key}`);
   }
 
-  // ==================== 用户支付配置管理 ====================
+  // ==================== 用户积分配置管理 ====================
 
   /**
-   * 创建用户支付配置
-   * @param request - 创建用户支付配置的请求参数
-   * @returns 创建的用户支付配置
+   * 创建用户积分配置
+   * @param request - 创建用户积分配置的请求参数
+   * @returns 创建的用户积分配置
    * @throws {UnauthorizedError} 当未登录时
    * @throws {ForbiddenError} 当无管理员权限时
    * @throws {ValidationError} 当参数验证失败或等级已存在时
@@ -153,15 +153,15 @@ export class AdminService extends BaseService {
   }
 
   /**
-   * 获取用户支付配置列表
-   * @returns 用户支付配置列表（按最低分数升序排序）
+   * 获取用户积分配置列表
+   * @returns 用户积分配置列表（按最低分数升序排序）
    * @throws {UnauthorizedError} 当未登录时
    * @throws {ForbiddenError} 当无管理员权限时
    * 
    * @example
    * ```typescript
    * const configs = await AdminService.listUserPayConfigs();
-   * console.log('支付配置数量:', configs.length);
+   * console.log('积分配置数量:', configs.length);
    * ```
    */
   static async listUserPayConfigs(): Promise<UserPayConfig[]> {
@@ -169,9 +169,9 @@ export class AdminService extends BaseService {
   }
 
   /**
-   * 获取单个用户支付配置
+   * 获取单个用户积分配置
    * @param id - 配置ID
-   * @returns 用户支付配置信息
+   * @returns 用户积分配置信息
    * @throws {UnauthorizedError} 当未登录时
    * @throws {ForbiddenError} 当无管理员权限时
    * @throws {NotFoundError} 当配置不存在时
@@ -187,9 +187,9 @@ export class AdminService extends BaseService {
   }
 
   /**
-   * 更新用户支付配置
+   * 更新用户积分配置
    * @param id - 配置ID
-   * @param request - 更新用户支付配置的请求参数
+   * @param request - 更新用户积分配置的请求参数
    * @returns void
    * @throws {UnauthorizedError} 当未登录时
    * @throws {ForbiddenError} 当无管理员权限时
@@ -219,7 +219,7 @@ export class AdminService extends BaseService {
   }
 
   /**
-   * 删除用户支付配置
+   * 删除用户积分配置
    * @param id - 配置ID
    * @returns void
    * @throws {UnauthorizedError} 当未登录时

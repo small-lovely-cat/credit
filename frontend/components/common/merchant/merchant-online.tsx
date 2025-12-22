@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "motion/react"
-import { Key, Smartphone, Tablet, Monitor, RotateCw, Plus, Trash2, Copy, ExternalLink, CreditCard, ArrowLeft, Loader2, Eye, EyeOff, Expand, Minimize, Sun, Moon } from "lucide-react"
+import { Key, Smartphone, Tablet, Monitor, RotateCw, Plus, Trash2, Copy, ExternalLink, CreditCard, Store, Loader2, Eye, EyeOff, Expand, Minimize, Sun, Moon } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -20,6 +20,7 @@ import { PayingInfo } from "@/components/common/pay/paying/paying-info"
 import { PayingNow } from "@/components/common/pay/paying/paying-now"
 import { MerchantSelector } from "@/components/common/merchant/merchant-selector"
 import { LoadingPage } from "@/components/layout/loading"
+import { EmptyState } from "@/components/layout/empty"
 import { TransactionTableList } from "@/components/common/general/table-data"
 
 /** 设备预览配置 */
@@ -48,8 +49,13 @@ const DEVICE_CONFIG = {
 } as const
 
 export function MerchantOnline() {
+  const router = useRouter()
   const searchParams = useSearchParams()
-  const { apiKeys, loading: loadingKeys } = useMerchant()
+  const { apiKeys, loading: loadingKeys, loadAPIKeys } = useMerchant()
+
+  useEffect(() => {
+    loadAPIKeys()
+  }, [loadAPIKeys])
   const apiKeyId = searchParams.get("apiKeyId")
   const selectedKey = apiKeys.find(k => k.id.toString() === apiKeyId) || null
 
@@ -59,21 +65,19 @@ export function MerchantOnline() {
 
   if (apiKeys.length === 0) {
     return (
-      <div className="flex flex-col gap-6 py-6 box-border h-[calc(100vh-60px)]">
-        <div className="flex items-center justify-between border-b pb-2 shrink-0">
+      <div className="py-6">
+        <div className="flex items-center justify-between border-b pb-2 mb-4 shrink-0">
           <h1 className="text-2xl font-semibold">在线流转</h1>
-        </div>
-        <div className="flex flex-col items-center justify-center p-8 text-center border border-dashed rounded-lg flex-1">
-          <div className="rounded-lg p-3 bg-muted/50 mb-4">
-            <Key className="size-6 text-muted-foreground" />
-          </div>
-          <h3 className="text-sm font-semibold mb-1">暂未创建应用</h3>
-          <p className="text-xs text-muted-foreground mb-4 max-w-sm mx-auto">
-            您还没有创建任何应用。请前往集市中心创建应用，即可开始使用在线积分流转服务。
-          </p>
-          <Button onClick={() => window.location.href = '/merchant'} variant="default" size="sm">
-            前往集市中心
+          <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => router.push('/merchant')}>
+            <Store className="size-3 mr-1" /> 前往集市
           </Button>
+        </div>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <EmptyState
+            title="暂未创建应用"
+            description="您还没有创建任何应用。请前往集市中心创建应用，即可开始使用在线积分流转服务。"
+            icon={Key}
+          />
         </div>
       </div>
     )
@@ -191,12 +195,6 @@ function MerchantOnlineContent({ apiKeys }: MerchantOnlineContentProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedKey?.client_id])
 
-
-  /* 处理返回 */
-  const handleBack = () => {
-    router.back()
-  }
-
   /* 处理创建 */
   const handleCreate = async () => {
     if (!selectedKey) return
@@ -299,8 +297,8 @@ function MerchantOnlineContent({ apiKeys }: MerchantOnlineContentProps) {
   }
 
   return (
-    <div className="flex flex-col gap-6 py-6 box-border h-[calc(100vh-60px)]">
-      <div className="flex items-center justify-between border-b pb-2 shrink-0">
+    <div className="py-6">
+      <div className="flex items-center justify-between border-b pb-2 mb-4 shrink-0">
         <h1 className="text-2xl font-semibold">在线流转</h1>
         <div className="flex items-center gap-3">
           {apiKeys.length > 0 && (
@@ -310,30 +308,21 @@ function MerchantOnlineContent({ apiKeys }: MerchantOnlineContentProps) {
               onSelect={handleMerchantSelect}
             />
           )}
-          <Button variant="outline" size="sm" className="h-8 text-xs" onClick={handleBack}>
-            <ArrowLeft className="size-3" /> 返回
+          <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => router.push('/merchant')}>
+            <Store className="size-3 mr-1" /> 前往集市
           </Button>
         </div>
       </div>
 
       {!selectedKey ? (
-        <div className="flex flex-col items-center justify-center p-8 text-center border border-dashed rounded-lg flex-1">
-          <div className="rounded-lg p-3 bg-muted/50 mb-4">
-            <Key className="size-6 text-muted-foreground" />
-          </div>
-          <h3 className="text-sm font-semibold mb-1">
-            {apiKeys.length === 0 ? "暂未创建应用" : "未选择应用"}
-          </h3>
-          <p className="text-xs text-muted-foreground mb-4 max-w-sm mx-auto">
-            {apiKeys.length === 0
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <EmptyState
+            title={apiKeys.length === 0 ? "暂未创建应用" : "未选择应用"}
+            description={apiKeys.length === 0
               ? "您还没有创建任何应用。请前往集市中心创建一个应用，即可开始管理在线积分流转服务。"
               : "请先在右上角选择一个应用以管理此应用的所有在线积分流转服务。"}
-          </p>
-          {apiKeys.length === 0 && (
-            <Button onClick={() => router.push('/merchant')} variant="default" size="sm">
-              前往集市应用中心
-            </Button>
-          )}
+            icon={Key}
+          />
         </div>
       ) : (
         <div className="flex flex-col gap-6 h-full min-h-0">

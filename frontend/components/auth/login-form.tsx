@@ -1,9 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { toast } from "sonner"
 import { Spinner } from "@/components/ui/spinner"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { motion, useAnimation } from "motion/react"
 import {
   Dialog,
   DialogContent,
@@ -42,9 +44,39 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
   const [isLoading, setIsLoading] = useState(false)
+  const [hasAgreed, setHasAgreed] = useState(false)
+  const controls = useAnimation()
+
+
+  useEffect(() => {
+    const agreed = localStorage.getItem("loginPromptAgreed") === "true"
+    if (agreed) {
+      setHasAgreed(true)
+    }
+  }, [])
+
+  const handleAgreementChange = (checked: boolean | string) => {
+    const isChecked = checked === true
+    setHasAgreed(isChecked)
+    if (isChecked) {
+      localStorage.setItem("loginPromptAgreed", "true")
+    } else {
+      localStorage.removeItem("loginPromptAgreed")
+    }
+  }
 
   /* 处理登录 */
   const handleLogin = async () => {
+    if (!hasAgreed) {
+      toast.error("请先阅读并勾选服务条款和隐私政策")
+      controls.start({
+        x: [0, -4, 4, -4, 4, 0],
+        color: ["#ef4444", "inherit"],
+        transition: { duration: 0.5 }
+      })
+      return
+    }
+
     setIsLoading(true)
     try {
       await services.auth.initiateLogin()
@@ -67,69 +99,83 @@ export function LoginForm({
         <Button
           variant="default"
           type="button"
-          className="w-full h-10 rounded-full tracking-wide bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-95"
+          className="w-full h-9 rounded-full tracking-wide bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-95"
           onClick={handleLogin}
           disabled={isLoading}
         >
           {isLoading ? <Spinner className="mr-2" /> : <SquareArrowUpRight className="mr-2 h-4 w-4" />}
           {isLoading ? "正在跳转..." : "使用 LINUX DO 登录"}
         </Button>
-
       </div>
 
-      <div className="text-muted-foreground text-center text-xs text-balance opacity-75 hover:opacity-100 transition-opacity">
-        登录即代表您同意我们的{" "}
-        <Dialog>
-          <DialogTrigger asChild>
-            <button
-              type="button"
-              className="underline underline-offset-4 hover:text-foreground"
-            >
-              服务条款
-            </button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>服务条款</DialogTitle>
-              <DialogDescription>请仔细阅读以下条款，使用本服务即表示您接受。</DialogDescription>
-            </DialogHeader>
-            <Accordion type="single" collapsible className="w-full">
-              {termsSections.map((section) => (
-                <AccordionItem key={section.value} value={section.value}>
-                  <AccordionTrigger>{section.title}</AccordionTrigger>
-                  <AccordionContent>{section.content}</AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </DialogContent>
-        </Dialog>
-        {" "}及{" "}
-        <Dialog>
-          <DialogTrigger asChild>
-            <button
-              type="button"
-              className="underline underline-offset-4 hover:text-foreground"
-            >
-              隐私政策
-            </button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>隐私政策</DialogTitle>
-              <DialogDescription>我们重视您的隐私，以下说明信息如何收集与使用。</DialogDescription>
-            </DialogHeader>
-            <Accordion type="single" collapsible className="w-full">
-              {privacySections.map((section) => (
-                <AccordionItem key={section.value} value={section.value}>
-                  <AccordionTrigger>{section.title}</AccordionTrigger>
-                  <AccordionContent>{section.content}</AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </DialogContent>
-        </Dialog>
-        .
-      </div>
+      <motion.div
+        animate={controls}
+        className="flex items-center justify-center space-x-2 px-4"
+      >
+        <Checkbox
+          id="terms"
+          checked={hasAgreed}
+          onCheckedChange={handleAgreementChange}
+        />
+        <label
+          htmlFor="terms"
+          className="text-muted-foreground text-xs text-balance opacity-75 hover:opacity-100 transition-opacity cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        >
+          我已阅读并同意
+          {" "}
+          <Dialog>
+            <DialogTrigger asChild>
+              <button
+                type="button"
+                className="underline underline-offset-4 hover:text-foreground"
+                onClick={(e) => e.stopPropagation()}
+              >
+                服务条款
+              </button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>服务条款</DialogTitle>
+                <DialogDescription>请仔细阅读以下条款，使用本服务即表示您接受。</DialogDescription>
+              </DialogHeader>
+              <Accordion type="single" collapsible className="w-full">
+                {termsSections.map((section) => (
+                  <AccordionItem key={section.value} value={section.value}>
+                    <AccordionTrigger>{section.title}</AccordionTrigger>
+                    <AccordionContent>{section.content}</AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </DialogContent>
+          </Dialog>
+          {" "}及{" "}
+          <Dialog>
+            <DialogTrigger asChild>
+              <button
+                type="button"
+                className="underline underline-offset-4 hover:text-foreground"
+                onClick={(e) => e.stopPropagation()}
+              >
+                隐私政策
+              </button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>隐私政策</DialogTitle>
+                <DialogDescription>我们重视您的隐私，以下说明信息如何收集与使用。</DialogDescription>
+              </DialogHeader>
+              <Accordion type="single" collapsible className="w-full">
+                {privacySections.map((section) => (
+                  <AccordionItem key={section.value} value={section.value}>
+                    <AccordionTrigger>{section.title}</AccordionTrigger>
+                    <AccordionContent>{section.content}</AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </DialogContent>
+          </Dialog>
+        </label>
+      </motion.div>
     </div>
   )
 }

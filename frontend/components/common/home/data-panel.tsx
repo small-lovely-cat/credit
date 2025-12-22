@@ -1,26 +1,27 @@
-import { Area, AreaChart, XAxis, YAxis } from "recharts"
+import * as React from "react"
+import { Area, AreaChart, XAxis } from "recharts"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { CountingNumber } from '@/components/animate-ui/primitives/texts/counting-number';
+import { CountingNumber } from '@/components/animate-ui/primitives/texts/counting-number'
+import { Skeleton } from "@/components/ui/skeleton"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Info } from "lucide-react"
 
 import { useUser } from "@/contexts/user-context"
-
-
-const chartData = [
-  { date: "10-28", total: 0 },
-  { date: "10-29", total: 99 },
-  { date: "10-30", total: 20 },
-  { date: "10-31", total: 90 },
-  { date: "11-01", total: 20 },
-  { date: "11-02", total: 100 },
-  { date: "11-03", total: 200 },
-  { date: "11-04", total: 0.01 },
-  { date: "11-05", total: 0 },
-]
+import { DashboardService } from "@/lib/services"
+import type { DailyStatsItem } from "@/lib/services"
 
 const chartConfig = {
   total: {
-    label: "积分值",
+    label: "积分总额",
     color: "hsl(217, 91%, 60%)",
+  },
+  income: {
+    label: "收入",
+    color: "#10b981", // emerald-500
+  },
+  expense: {
+    label: "支出",
+    color: "#f43f5e", // rose-500
   },
 } satisfies ChartConfig
 
@@ -30,73 +31,176 @@ const chartConfig = {
  * @returns {React.ReactNode} 数据面板组件
  */
 export function DataPanel() {
-  const { user, loading } = useUser()
+  const { user, loading: userLoading } = useUser()
+  const [dailyStats, setDailyStats] = React.useState<DailyStatsItem[]>([])
+  const [loading, setLoading] = React.useState(true)
 
   const availableBalance = parseFloat(user?.available_balance || '0')
   const remainQuota = parseFloat(user?.remain_quota || '0')
 
+  /* 获取每日统计数据 */
+  React.useEffect(() => {
+    const fetchDailyStats = async () => {
+      setLoading(true)
+      const data = await DashboardService.getDailyStats(7)
+      setDailyStats(data)
+      setLoading(false)
+    }
+
+    if (!userLoading && user) {
+      fetchDailyStats()
+    }
+  }, [userLoading, user])
+
+  /* 根据当前余额和每日收支反推历史积分总额 */
+  const chartData = React.useMemo(() => {
+    if (!dailyStats.length || userLoading) return []
+
+    const sortedStats = [...dailyStats].sort((a, b) =>
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    )
+
+    let currentBalance = availableBalance
+    const balanceHistory: Array<{ date: string; total: number; income: number; expense: number }> = []
+
+    for (let i = 0; i < sortedStats.length; i++) {
+      const stat = sortedStats[i]
+      const income = parseFloat(stat.income || '0')
+      const expense = parseFloat(stat.expense || '0')
+
+      balanceHistory.unshift({
+        date: new Date(stat.date).toLocaleDateString('zh-CN', {
+          month: 'numeric',
+          day: 'numeric'
+        }),
+        total: Math.max(0, currentBalance),
+        income,
+        expense
+      })
+
+      currentBalance = currentBalance - income + expense
+    }
+
+    return balanceHistory
+  }, [dailyStats, availableBalance, userLoading])
+
   return (
     <div className="grid grid-cols-3 gap-12">
       <div className="col-span-2">
-        <h3 className="text-sm text-muted-foreground font-medium">积分总额</h3>
+        <h3 className="text-sm text-muted-foreground font-medium mb-2">积分趋势</h3>
 
-        <ChartContainer config={chartConfig} className="w-full h-[240px]">
-          <AreaChart
-            data={chartData}
-            margin={{
-              left: 6,
-              right: 6,
-              top: 12,
-              bottom: 12,
-            }}
-          >
-            <defs>
-              <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="hsl(217, 91%, 60%)" stopOpacity={0.3} />
-                <stop offset="100%" stopColor="hsl(217, 91%, 60%)" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <XAxis dataKey="date" hide />
-            <YAxis hide />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent indicator="dot" />}
-            />
-            <Area
-              dataKey="total"
-              type="monotone"
-              fill="url(#colorTotal)"
-              stroke="var(--color-total)"
-              strokeWidth={1}
-              dot={{
-                fill: "hsl(217, 91%, 60%)",
-                stroke: "hsl(217, 91%, 60%)",
-                strokeWidth: 3,
-                r: 1,
+        {loading || userLoading ? (
+          <div className="w-full h-[240px] flex items-center justify-center">
+            <Skeleton className="h-full w-full rounded-lg" />
+          </div>
+        ) : chartData.length > 0 ? (
+          <ChartContainer config={chartConfig} className="w-full h-[240px]">
+            <AreaChart
+              data={chartData}
+              margin={{
+                left: 6,
+                right: 6,
+                top: 12,
+                bottom: 12,
               }}
-              activeDot={{
-                fill: "hsl(217, 91%, 60%)",
-                stroke: "hsl(217, 91%, 60%)",
-                strokeWidth: 3,
-                r: 2,
-              }}
-            />
-          </AreaChart>
-        </ChartContainer>
+            >
+              <defs>
+                <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(217, 91%, 60%)" stopOpacity={0.2} />
+                  <stop offset="95%" stopColor="hsl(217, 91%, 60%)" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.2} />
+                  <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="date" hide />
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent indicator="dot" />}
+              />
+              <Area
+                dataKey="total"
+                type="monotone"
+                fill="url(#colorTotal)"
+                fillOpacity={0.4}
+                stroke="var(--color-total)"
+                strokeWidth={2}
+                dot={false}
+                activeDot={{
+                  fill: "hsl(217, 91%, 60%)",
+                  stroke: "var(--background)",
+                  strokeWidth: 2,
+                  r: 4,
+                }}
+              />
+              <Area
+                dataKey="income"
+                type="monotone"
+                fill="none"
+                stroke="#10b981"
+                strokeWidth={1.5}
+                strokeDasharray="4 4"
+                dot={false}
+                activeDot={{
+                  fill: "#10b981",
+                  stroke: "var(--background)",
+                  strokeWidth: 2,
+                  r: 4,
+                }}
+              />
+              <Area
+                dataKey="expense"
+                type="monotone"
+                fill="none"
+                stroke="#f43f5e"
+                strokeWidth={1.5}
+                strokeDasharray="4 4"
+                dot={false}
+                activeDot={{
+                  fill: "#f43f5e",
+                  stroke: "var(--background)",
+                  strokeWidth: 2,
+                  r: 4,
+                }}
+              />
+            </AreaChart>
+          </ChartContainer>
+        ) : (
+          <div className="w-full h-[240px] flex items-center justify-center border border-dashed rounded-lg">
+            <p className="text-xs text-muted-foreground">暂无统计数据</p>
+          </div>
+        )}
       </div>
 
       <div className="col-span-1 flex flex-col">
         <div className="flex-1 border-b pb-4">
           <div className="text-sm text-muted-foreground font-medium">LINUX DO Credits</div>
           <div className="text-xl font-semibold pt-2">
-            {loading ? '-' : <CountingNumber number={availableBalance} decimalPlaces={2} />}
+            {userLoading ? '-' : <CountingNumber number={availableBalance} decimalPlaces={2} />}
           </div>
         </div>
 
         <div className="flex-1 pt-4">
-          <div className="text-sm text-muted-foreground font-medium">今日剩余额度</div>
+          <div className="text-sm text-muted-foreground font-medium flex items-center gap-1">
+            今日剩余额度
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="size-3.5" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>每日积分消耗额度限制，每日 0 点自动重置</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           <div className="text-xl font-semibold pt-2">
-            {loading ? '-' : <CountingNumber number={remainQuota} decimalPlaces={2} />}
+            {userLoading ? '-' : <CountingNumber number={remainQuota} decimalPlaces={2} />}
           </div>
         </div>
       </div>

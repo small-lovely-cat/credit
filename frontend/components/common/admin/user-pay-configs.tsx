@@ -10,8 +10,8 @@ import { useAdmin } from "@/contexts/admin-context"
 
 
 /**
- * 支付配置详情面板组件
- * 显示支付配置的详细信息和编辑面板
+ * 积分配置详情面板组件
+ * 显示积分配置的详细信息和编辑面板
  * 
  * @example
  * ```tsx
@@ -23,12 +23,12 @@ import { useAdmin } from "@/contexts/admin-context"
  *   saving={saving}
  * />
  * ```
- * @param {UserPayConfig} config - 支付配置
+ * @param {UserPayConfig} config - 积分配置
  * @param {Partial<UserPayConfig>} editData - 编辑数据
  * @param {function} onEditDataChange - 编辑数据改变回调
  * @param {function} onSave - 保存回调
  * @param {boolean} saving - 是否正在保存
- * @returns {React.ReactNode} 支付配置详情面板组件
+ * @returns {React.ReactNode} 积分配置详情面板组件
  */
 function PayConfigDetailPanel({
   config,
@@ -173,6 +173,42 @@ function PayConfigDetailPanel({
             </div>
           </div>
 
+          <div className="px-3 py-2 flex items-center justify-between border-b border-dashed last:border-b-0">
+            <label className="text-xs font-medium text-muted-foreground">分数转化率</label>
+            <div className="flex items-right gap-1">
+              <Input
+                type="number"
+                step="1"
+                min="0"
+                max="100"
+                value={
+                  editData.score_rate !== undefined
+                    ? (parseFloat(editData.score_rate.toString()) * 100).toString()
+                    : (config?.score_rate ? (parseFloat(config.score_rate.toString()) * 100).toString() : '')
+                }
+                placeholder={editData.score_rate === undefined && !config?.score_rate ? '必需' : ''}
+                onChange={(e) => {
+                  const value = e.target.value
+                  if (value === '') {
+                    onEditDataChange('score_rate', '0')
+                    return
+                  }
+
+                  const numValue = parseInt(value)
+                  if (isNaN(numValue)) {
+                    return
+                  }
+
+                  if (numValue >= 0 && numValue <= 100) {
+                    onEditDataChange('score_rate', (numValue / 100).toString())
+                  }
+                }}
+                className="text-xs text-right h-4 w-16 px-0 mr-3 rounded-none border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[12px]"
+              />
+              <p className="text-xs text-muted-foreground">%</p>
+            </div>
+          </div>
+
           <div className="px-3 py-2 flex items-center justify-between">
             <label className="text-xs font-medium text-muted-foreground">每日支付上限</label>
             <div className="flex items-center gap-1">
@@ -214,13 +250,13 @@ function PayConfigDetailPanel({
 
 
 /**
- * 用户支付配置管理组件
+ * 用户积分配置管理组件
  * 
  * @example
  * ```tsx
  * <UserPayConfigs />
  * ```
- * @returns {React.ReactNode} 用户支付配置管理组件
+ * @returns {React.ReactNode} 用户积分配置管理组件
  */
 export function UserPayConfigs() {
   const {
@@ -237,6 +273,7 @@ export function UserPayConfigs() {
     max_score: config.max_score,
     daily_limit: config.daily_limit,
     fee_rate: config.fee_rate.toString(),
+    score_rate: config.score_rate.toString(),
   })
 
   const handleSave = async (config: UserPayConfig, editData: Partial<UserPayConfig>) => {
@@ -247,6 +284,7 @@ export function UserPayConfigs() {
       max_score: editData.max_score,
       daily_limit: editData.daily_limit,
       fee_rate: editData.fee_rate?.toString() ?? config.fee_rate.toString(),
+      score_rate: editData.score_rate?.toString() ?? config.score_rate.toString(),
     })
     await refetchUserPayConfigs()
   }
@@ -257,7 +295,7 @@ export function UserPayConfigs() {
 
   return (
     <ManagePage<UserPayConfig>
-      title="支付配置"
+      title="积分配置"
       data={configs}
       loading={loading}
       error={error}
@@ -266,14 +304,15 @@ export function UserPayConfigs() {
       onSave={handleSave}
       onDelete={handleDelete}
       getId={(config) => config.id}
-      emptyDescription="未发现支付配置"
+      emptyDescription="未发现积分配置"
       loadingDescription="配置加载中"
       columns={[
         { header: "等级", cell: (item) => <span className="font-medium">Level {item.level}</span>, width: "min-w-[80px]", align: "left" },
         { header: "最低分", cell: (item) => item.min_score, width: "min-w-[200px]", align: "left" },
         { header: "最高分", cell: (item) => item.max_score || "无限制", width: "min-w-[200px]", align: "left" },
-        { header: "每日限额", cell: (item) => item.daily_limit ? `LDC ${item.daily_limit.toLocaleString()}` : "无限制", width: "min-w-[200px]", align: "left" },
-        { header: "费率", cell: (item) => `${(Number(item.fee_rate) * 100).toFixed(2)}%`, width: "min-w-[200px]", align: "left" },
+        { header: "每日限额", cell: (item) => item.daily_limit ? `LDC ${ item.daily_limit.toLocaleString() }` : "无限制", width: "min-w-[200px]", align: "left" },
+        { header: "费率", cell: (item) => `${ (Number(item.fee_rate) * 100).toFixed(2) }%`, width: "min-w-[200px]", align: "left" },
+        { header: "分数转化率", cell: (item) => `${ (Number(item.score_rate) * 100).toFixed(2) }%`, width: "min-w-[200px]", align: "left" },
         { header: "更新时间", cell: (item) => <span className="text-muted-foreground">{formatDateTime(item.updated_at)}</span>, width: "min-w-[200px]", align: "left" },
       ]}
       renderDetail={({ selected, hovered, editData, onEditDataChange, onSave, saving }) => (

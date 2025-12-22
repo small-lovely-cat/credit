@@ -221,14 +221,14 @@ export function LoginPage() {
                 setSetupStep('password')
                 setConfirmPayKey('')
               }}
-              className="flex-1 h-10 rounded-full tracking-wide text-sm font-bold transition-all active:scale-95"
+              className="flex-1 h-9 rounded-full tracking-wide text-sm font-bold transition-all active:scale-95"
             >
               返回
             </Button>
           )}
           <Button
             type="submit"
-            className="flex-1 h-10 rounded-full tracking-wide bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-95"
+            className="flex-1 h-9 rounded-full tracking-wide bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-95"
             disabled={
               setupStep === 'password'
                 ? !isPayKeyValid

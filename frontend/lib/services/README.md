@@ -100,7 +100,7 @@ lib/services/
 │   └── index.ts               # 模块导出 + 文档
 │
 ├── admin/                     # 管理员服务模块
-│   ├── admin.service.ts       # 系统配置、用户支付配置管理
+│   ├── admin.service.ts       # 系统配置、用户积分配置管理
 │   ├── types.ts               # SystemConfig、UserPayConfig 等
 │   └── index.ts               # 模块导出 + 文档
 │
