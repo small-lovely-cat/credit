@@ -85,7 +85,7 @@ export class AuthService extends BaseService {
    * ```
    */
   static async logout(): Promise<void> {
-    return this.get<void>('/logout');
+    await this.get<void>('/logout');
   }
 
   /**
@@ -99,6 +99,15 @@ export class AuthService extends BaseService {
    * ```
    */
   static async initiateLogin(): Promise<void> {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const callbackUrl = params.get('callbackUrl');
+
+      if (callbackUrl) {
+        sessionStorage.setItem('redirect_after_login', callbackUrl);
+      }
+    }
+
     const url = await this.getLoginUrl();
     if (typeof window !== 'undefined' && url) {
       window.location.href = url;

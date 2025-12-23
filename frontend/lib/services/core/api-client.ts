@@ -80,7 +80,6 @@ function initiateLogin(currentPath: string): Promise<never> {
   if (!currentPath.startsWith('/login') && !currentPath.startsWith('/callback')) {
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('redirect_after_login', currentPath);
-      // Ensure we preserve the query parameters if needed, but for now just the path
       const loginUrl = new URL('/login', window.location.origin);
       loginUrl.searchParams.set('callbackUrl', currentPath);
       window.location.href = loginUrl.toString();

@@ -15,7 +15,7 @@ export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl
   const sessionCookie = request.cookies.get('linux_do_credit_session_id')
 
-  // 定义不需要身份验证的公共路由
+  /* 定义公共路由 */
   const publicRoutes = [
     '/',
     '/login',
@@ -25,25 +25,21 @@ export function proxy(request: NextRequest) {
     '/docs',
   ]
 
-  // 定义公共路径前缀
+  /* 定义公共路径前缀（易支付等外部接口） */
   const publicPrefixes = [
-    '/pay/',  // 无需认证即可访问的支付页面
-    '/_next/', // Next.js 内部文件
-    '/api/',  // API 路由
+    '/epay/', // 易支付 API 兼容接口
   ]
 
-  // 检查当前路径是否为公共路径
+  /* 检查当前路径是否为公共路径 */
   const isPublicRoute = publicRoutes.includes(pathname) ||
     publicPrefixes.some(prefix => pathname.startsWith(prefix))
 
-  // 如果是公共路由，允许通过
   if (isPublicRoute) {
     return NextResponse.next()
   }
 
-  // 受保护路由：检查会话 cookie
   if (!sessionCookie) {
-    const callbackUrl = encodeURIComponent(pathname + search)
+    const callbackUrl = pathname + search
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('callbackUrl', callbackUrl)
 
@@ -55,17 +51,15 @@ export function proxy(request: NextRequest) {
 
 /**
  * 配置代理应在哪些路由上运行
- * 使用匹配器排除静态文件以获得更好的性能
+ * 
+ * 使用 negative lookahead 排除不需要代理的路径：
+ * - _next/* (Next.js 内部资源，包括 webpack-hmr WebSocket、static、image 等)
+ * - api/* (API 路由)
+ * - favicon.ico, robots.txt, sitemap.xml (元数据文件)
+ * - 静态资源文件（图片等）
  */
 export const config = {
   matcher: [
-    /*
-     * 匹配所有请求路径，但排除：
-     * - _next/static (静态文件)
-     * - _next/image (图片优化)
-     * - favicon.ico, robots.txt, sitemap.xml (元文件)
-     * - 图片和其他静态资源
-     */
-    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:jpg|jpeg|gif|png|svg|ico|webp)).*)',
+    '/((?!_next|api|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:jpg|jpeg|gif|png|svg|ico|webp)).*)',
   ],
 }

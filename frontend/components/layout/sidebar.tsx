@@ -3,7 +3,9 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
+import { Spinner } from "@/components/ui/spinner"
 import { AnimateIcon } from "@/components/animate-ui/icons/icon"
 import { ChevronLeft } from "@/components/animate-ui/icons/chevron-left"
 import { ChevronRight } from "@/components/animate-ui/icons/chevron-right"
@@ -92,8 +94,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { toggleSidebar, state } = useSidebar()
   const { user, getTrustLevelLabel, logout } = useUser()
   const [showLogoutDialog, setShowLogoutDialog] = React.useState(false)
+  const [isLoggingOut, setIsLoggingOut] = React.useState(false)
   const pathname = usePathname()
   const router = useRouter()
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+    try {
+      await logout()
+      setShowLogoutDialog(false)
+    } catch (error) {
+      toast.error("登出失败", {
+        description: error instanceof Error ? error.message : "登出时发生错误，请重试"
+      })
+      setIsLoggingOut(false)
+    }
+  }
 
   return (
     <>
@@ -279,17 +295,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarContent>
       </Sidebar>
 
-      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+      <AlertDialog open={showLogoutDialog} onOpenChange={(open) => !isLoggingOut && setShowLogoutDialog(open)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>确认登出</AlertDialogTitle>
             <AlertDialogDescription>
-              您确定要登出当前账户吗？
+              {isLoggingOut ? '正在登出，请稍候...' : '您确定要登出当前账户吗？'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>取消</AlertDialogCancel>
-            <AlertDialogAction onClick={logout}>确认登出</AlertDialogAction>
+            <AlertDialogCancel disabled={isLoggingOut}>取消</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout} disabled={isLoggingOut}>
+              {isLoggingOut && <Spinner className="mr-2" />}
+              {isLoggingOut ? '登出中...' : '确认登出'}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

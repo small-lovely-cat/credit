@@ -116,12 +116,16 @@ export function UserProvider({ children }: { children: ReactNode }) {
       setState({ user: null, loading: false, error: null })
       window.location.href = '/login'
     } catch (error) {
-      if (!isMountedRef.current) return
+      if (!isMountedRef.current) {
+        throw error
+      }
 
+      const errorMessage = error instanceof Error ? error.message : '登出失败'
       setState(prev => ({
         ...prev,
-        error: error instanceof Error ? error.message : '登出失败',
+        error: errorMessage,
       }))
+      throw new Error(errorMessage)
     }
   }, [])
 

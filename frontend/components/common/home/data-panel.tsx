@@ -12,16 +12,16 @@ import type { DailyStatsItem } from "@/lib/services"
 
 const chartConfig = {
   total: {
-    label: "积分总额",
+    label: "总额",
     color: "hsl(217, 91%, 60%)",
   },
   income: {
     label: "收入",
-    color: "#10b981", // emerald-500
+    color: "#10b981",
   },
   expense: {
     label: "支出",
-    color: "#f43f5e", // rose-500
+    color: "#f43f5e",
   },
 } satisfies ChartConfig
 
@@ -94,7 +94,7 @@ export function DataPanel() {
             <Skeleton className="h-full w-full rounded-lg" />
           </div>
         ) : chartData.length > 0 ? (
-          <ChartContainer config={chartConfig} className="w-full h-[240px]">
+          <ChartContainer config={chartConfig} className="w-full h-[240px] font-bold">
             <AreaChart
               data={chartData}
               margin={{
