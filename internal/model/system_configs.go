@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/shopspring/decimal"
 
 	"github.com/linux-do/credit/internal/db"
 )
@@ -33,6 +34,7 @@ const (
 	ConfigKeyMerchantOrderExpireMinutes = "merchant_order_expire_minutes" // 商家订单过期时间（分钟）
 	ConfigKeyWebsiteOrderExpireMinutes  = "website_order_expire_minutes"  // 网站订单过期时间（分钟）
 	ConfigKeyDisputeTimeWindowHours     = "dispute_time_window_hours"     // 商家争议时间窗口（小时）
+	ConfigKeyNewUserInitialCredit       = "new_user_initial_credit"       // 新用户注册初始积分
 )
 
 const (
@@ -81,4 +83,21 @@ func GetIntByKey(ctx context.Context, key string) (int, error) {
 	}
 
 	return value, nil
+}
+
+// GetDecimalByKey 通过 key 查询配置并转换为 decimal.Decimal 类型
+// precision 指定保留的小数位数，多余的小数会被裁剪
+func GetDecimalByKey(ctx context.Context, key string, precision int32) (decimal.Decimal, error) {
+	var sc SystemConfig
+	if err := sc.GetByKey(ctx, key); err != nil {
+		return decimal.Zero, err
+	}
+
+	value, err := decimal.NewFromString(sc.Value)
+	if err != nil {
+		return decimal.Zero, fmt.Errorf("配置 %s 的值 '%s' 无法转换为decimal: %w", key, sc.Value, err)
+	}
+
+	// 裁剪到指定小数位数
+	return value.Truncate(precision), nil
 }

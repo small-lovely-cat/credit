@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"time"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -30,7 +29,6 @@ import (
 	"github.com/linux-do/credit/internal/db"
 	"github.com/linux-do/credit/internal/model"
 	"github.com/linux-do/credit/internal/otel_trace"
-	"github.com/linux-do/credit/internal/util"
 	"go.opentelemetry.io/otel/codes"
 	"gorm.io/gorm"
 )
@@ -104,21 +102,12 @@ func doOAuth(ctx context.Context, code string) (*model.User, error) {
 				return nil, err
 			}
 		} else if errors.Is(txByUsername.Error, gorm.ErrRecordNotFound) {
-			user = model.User{
-				ID:          userInfo.Id,
-				Username:    userInfo.Username,
-				Nickname:    userInfo.Name,
-				AvatarUrl:   userInfo.AvatarUrl,
-				IsActive:    userInfo.Active,
-				TrustLevel:  userInfo.TrustLevel,
-				SignKey:     util.GenerateUniqueIDSimple(),
-				LastLoginAt: time.Now(),
-			}
-			if err = db.DB(ctx).Create(&user).Error; err != nil {
+			// ID 和 username 都不存在(全新用户)
+			user = model.User{}
+			if err = user.CreateWithInitialCredit(ctx, &userInfo); err != nil {
 				span.SetStatus(codes.Error, err.Error())
 				return nil, err
 			}
-			user.EnqueueBadgeScoreTask(ctx, 0)
 		} else {
 			// query failed
 			span.SetStatus(codes.Error, txByUsername.Error.Error())
@@ -127,11 +116,10 @@ func doOAuth(ctx context.Context, code string) (*model.User, error) {
 	} else {
 		if user.ID != userInfo.Id {
 			// username 相同但 ID 不同(账户注销后被新用户占用)
-			if _, err = user.MarkAsDeactivatedAndCreateNew(ctx, &userInfo); err != nil {
+			if err = user.CreateWithInitialCredit(ctx, &userInfo); err != nil {
 				span.SetStatus(codes.Error, err.Error())
 				return nil, err
 			}
-			user.EnqueueBadgeScoreTask(ctx, 0)
 		} else {
 			if err = user.CheckActive(); err != nil {
 				span.SetStatus(codes.Error, err.Error())
