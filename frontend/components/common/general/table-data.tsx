@@ -55,7 +55,7 @@ export const TransactionDataTable = React.memo(function TransactionDataTable({
     <div className="border border-dashed shadow-none rounded-lg overflow-hidden">
       <ScrollArea
         ref={scrollAreaRef}
-        className="w-full max-h-[600px] whitespace-nowrap"
+        className="w-full h-[600px] whitespace-nowrap"
       >
         <table className="w-full caption-bottom text-sm min-w-full">
           <TableHeader className="sticky top-0 z-20 bg-background">
