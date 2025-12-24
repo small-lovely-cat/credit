@@ -17,14 +17,15 @@ app:
   api_prefix: "/api"
   frontend_pay_url: "http://localhost:3000/paying"
 
-# OAuth2
+# OAuth2/OIDC(优先)
 oauth2:
   client_id: "<OAUTH2_CLIENT_ID>"
   client_secret: "<OAUTH2_CLIENT_SECRET>"
   redirect_uri: "<OAUTH2_REDIRECT_URI>"
-  authorization_endpoint: "https://connect.linux.do/oauth2/authorize"
-  token_endpoint: "https://connect.linux.do/oauth2/token"
-  user_endpoint: "https://connect.linux.do/api/user"
+  issuer: "https://connect.linux.do/"  # OIDC Issuer URL，用于自动发现端点
+  authorization_endpoint: "https://connect.linux.do/oauth2/authorize"  # 回退用
+  token_endpoint: "https://connect.linux.do/oauth2/token"  # 回退用
+  user_endpoint: "https://connect.linux.do/api/user"  # 回退用
 
 # DB
 # 支持两种模式：Standalone（单节点）、Primary-Replica（读写分离）

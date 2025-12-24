@@ -56,6 +56,13 @@ import (
 )
 
 func Serve() {
+	// 初始化 OIDC Provider
+	ctx := context.Background()
+	if err := oauth.InitOIDC(ctx); err != nil {
+		log.Printf("[API] Warning: Failed to initialize OIDC provider, falling back to OAuth2: %v\n", err)
+		oauth.InitOAuthFallback()
+	}
+
 	// 运行模式
 	if config.Config.App.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
