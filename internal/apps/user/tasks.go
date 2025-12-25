@@ -163,6 +163,12 @@ func HandleUpdateSingleUserGamificationScore(ctx context.Context, t *asynq.Task)
 		if protectionDays > 0 {
 			registeredDays := int(time.Since(user.CreatedAt).Hours() / 24)
 			if registeredDays < protectionDays {
+				if err := db.DB(ctx).Model(&user).UpdateColumns(map[string]interface{}{
+					"community_balance": newCommunityBalance,
+				}).Error; err != nil {
+					return fmt.Errorf("更新用户[%s]积分失败: %w", user.Username, err)
+				}
+
 				logger.InfoF(ctx, "用户[%s]在保护期内(注册%d天，保护期%d天)，积分下降%s，跳过扣分",
 					user.Username, registeredDays, protectionDays, diff.Abs().String())
 				return nil
