@@ -207,13 +207,6 @@ API 文档通过 Swagger 自动生成，启动后端服务后可访问：
 http://localhost:8000/swagger/index.html
 ```
 
-### 主要 API 端点
-
-- `GET /api/health` - 健康检查
-- `GET /api/oauth2/login` - OAuth2 登录
-- `GET /api/projects` - 获取项目列表
-- `POST /api/projects` - 创建新项目
-
 ## 🧪 测试
 
 ```bash
